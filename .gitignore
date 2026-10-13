@@ -1,0 +1,4 @@
+screenshots/
+tools/render/
+.DS_Store
+__pycache__/

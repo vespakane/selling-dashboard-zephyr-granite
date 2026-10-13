@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Selling</title>
+<link rel="icon" href="data:,">
+<style>
+  @font-face { font-family: "UI Sans"; font-weight: 400; font-style: normal; font-display: block;
+    src: url("assets/fonts/ui-regular.woff2") format("woff2"); }
+  @font-face { font-family: "UI Sans"; font-weight: 700; font-style: normal; font-display: block;
+    src: url("assets/fonts/ui-bold.woff2") format("woff2"); }
+
+  :root {
+    --ink: #191919;
+    --ink-2: #707070;
+    --surface: #ffffff;
+    --surface-2: #f7f7f7;
+    --surface-blue: #f5f8fe;
+    --blue: #2d66ed;
+    --red: #c32c20;
+    --green: #437e3d;
+    --line: #8f8f8f;
+    --pill: #e9e9e9;
+    --sb: #000000;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: #e9e9ec;
+    font-family: "UI Sans", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100%;
+  }
+
+  /* ---------- device ---------- */
+  .screen {
+    position: relative; width: 402px; height: 874px; background: #fff; overflow: hidden;
+    border-radius: 54px; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  }
+  @media (max-width: 480px), (max-height: 900px) {
+    body { display: block; background: #fff; }
+    .screen { width: 100%; height: 100dvh; border-radius: 0; box-shadow: none; }
+  }
+  html.capture body { display: block; background: #fff; }
+  html.capture .screen { width: 402px; height: 874px; border-radius: 0; box-shadow: none; }
+  .scroll {
+    position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    overscroll-behavior: contain;
+  }
+  .scroll::-webkit-scrollbar { display: none; }
+  button, .btn { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  svg { display: block; }
+
+  /* ---------- status bar + header (sticky) ---------- */
+  .top { position: sticky; top: 0; z-index: 5; background: #fff; }
+  .statusbar {
+    height: 59px; position: relative;
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  }
+  .statusbar .time { position: absolute; left: 48px; top: 20px; font-size: 17px; font-weight: 600; letter-spacing: -.2px; line-height: 22px; color: #000; display: flex; align-items: center; gap: 7px; }
+  .statusbar .time::after { content: ""; width: 13px; height: 13px; border-radius: 50%; background: #000; display: inline-block; }
+  .statusbar .right { position: absolute; right: 36px; top: 23px; display: flex; align-items: center; gap: 7px; }
+  .header { height: 57px; position: relative; }
+  .header h1 { position: absolute; left: 16px; top: 15px; font-size: 20px; line-height: 20px; font-weight: 700; letter-spacing: -.1px; }
+  .cart {
+    position: absolute; right: 16px; top: 2px; width: 46px; height: 46px; border-radius: 50%;
+    background: #f8f8f9; display: grid; place-items: center;
+    box-shadow: 0 5px 6px rgba(0,0,0,.07);
+  }
+
+  /* ---------- summary band ---------- */
+  .band { background: var(--surface-2); padding: 43px 16px 31px; }
+  .band .label { display: flex; align-items: center; gap: 7px; font-size: 12px; line-height: 12px; }
+  .band .label svg { width: 16px; height: 16px; }
+  .band .total { margin-top: 11px; font-size: 36px; line-height: 36px; font-weight: 700; letter-spacing: -.5px; display: flex; }
+  .stats { display: flex; gap: 8px; margin-top: 28px; }
+  .stat { width: 100px; height: 74px; background: #fff; border-radius: 16px; text-align: center; padding-top: 17px; }
+  .stat .k { font-size: 12px; line-height: 12px; letter-spacing: .1px; }
+  .stat .v { margin-top: 7px; font-size: 20px; line-height: 20px; font-weight: 700; }
+
+  /* ---------- sections ---------- */
+  .section { padding: 0 16px; }
+  h2 { font-size: 20px; line-height: 20px; font-weight: 700; letter-spacing: -.1px; margin-top: 50px; }
+  h2 .dot { margin: 0 4px; }
+
+  .tasks { margin-top: 19px; display: flex; flex-direction: column; gap: 12px; }
+  .task {
+    height: 60px; background: var(--surface-2); border-radius: 12px; display: flex; align-items: center;
+    padding: 0 20px; font-size: 14px; line-height: 14px; width: 100%; text-align: left;
+  }
+  .task .t { flex: 1; }
+  .task .n { width: 28px; height: 28px; display: grid; place-items: center; font-size: 12px; line-height: 12px; font-weight: 700; }
+  .task .n.badge { background: var(--red); color: #fff; border-radius: 50%; font-size: 13px; }
+
+  .funds { margin-top: 25px; display: flex; align-items: center; width: 100%; text-align: left; }
+  .funds .ic { width: 42px; height: 42px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; }
+  .funds .tx { margin-left: 6px; flex: 1; }
+  .funds .tx .l { font-size: 14px; line-height: 14px; }
+  .funds .tx .v { margin-top: 3px; font-size: 16px; line-height: 16px; font-weight: 700; display: flex; }
+  .chev { width: 8px; height: 14px; margin-right: 3px; }
+
+  /* ---------- research card ---------- */
+  .card-blue { margin-top: 39px; background: var(--surface-blue); border-radius: 16px; padding: 24px 16px 24px; }
+  .card-blue h3 { font-size: 20px; line-height: 22px; font-weight: 700; letter-spacing: 0; white-space: nowrap; }
+  .card-blue p { margin-top: 5px; font-size: 12px; line-height: 14.67px; }
+  .research {
+    margin-top: 16px; height: 48px; width: 100%; border: 1.5px solid var(--line); border-radius: 8px; background: var(--surface-2);
+    display: flex; align-items: center; padding-left: 15px; color: var(--ink-2); font-size: 14px; line-height: 14px; text-align: left;
+  }
+  .research svg { width: 23px; height: 22px; margin-right: 8px; }
+
+  /* ---------- high demand ---------- */
+  .hd-head { margin-top: 32px; position: relative; padding-right: 72px; }
+  .hd-head h2 { margin: 0; font-size: 24px; line-height: 28.67px; letter-spacing: -.2px; }
+  .hd-head .close {
+    position: absolute; right: 0; top: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--surface-2);
+    display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  }
+  .hd-sub { margin-top: 6px; font-size: 14px; line-height: 17px; padding-right: 32px; }
+  .cats { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
+  .cat { position: relative; height: 146px; background: var(--surface-2); border-radius: 16px; }
+  .cat .img { position: absolute; left: 19px; top: 18px; width: 98px; height: 98px; border-radius: 12px; object-fit: cover; z-index: 1;
+    box-shadow: 0 3px 10px rgba(0,0,0,.12); background: #fff; }
+  .cat .img-back { position: absolute; left: 10px; top: 27px; width: 98px; height: 98px; border-radius: 12px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  .cat .rank { position: absolute; left: 131px; top: 19px; display: flex; align-items: center; gap: 7px; color: var(--green); font-size: 10px; line-height: 10px; font-weight: 700; letter-spacing: .1px; }
+  .cat .rank svg { width: 14px; height: 9px; }
+  .cat .name { position: absolute; left: 130px; top: 37px; font-size: 14px; line-height: 14px; font-weight: 700; }
+  .cat .meta { position: absolute; left: 130px; top: 54px; font-size: 12px; line-height: 16px; }
+  .cat .start {
+    position: absolute; left: 130px; top: 98px; height: 32px; padding: 0 15px 0 13px; border: 1.5px solid var(--blue); border-radius: 16px;
+    color: var(--blue); font-size: 14px; line-height: 14px; display: flex; align-items: center; gap: 9px;
+  }
+  .cat .start svg { width: 16px; height: 16px; }
+  .showmore {
+    margin-top: 16px; width: 100%; height: 48px; border: 1.5px solid var(--line); border-radius: 24px; background: #fff;
+    display: flex; align-items: center; justify-content: center; gap: 9px; font-size: 16px; line-height: 16px;
+  }
+  .showmore svg { width: 14px; height: 8px; }
+
+  /* ---------- tools ---------- */
+  .tools-wrap { margin-left: -16px; margin-right: -16px; overflow-x: auto; scrollbar-width: none; }
+  .tools-wrap::-webkit-scrollbar { display: none; }
+  .tools { display: flex; gap: 24px; padding: 18px 16px 0; width: max-content; }
+  .tool { display: flex; flex-direction: column; align-items: center; }
+  .tool .ic { width: 48px; height: 48px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; }
+  .tool .ic svg { width: 26px; height: 26px; }
+  .tool .l { margin-top: 8px; font-size: 14px; line-height: 17px; white-space: nowrap; }
+
+  /* ---------- details ---------- */
+  .detail { display: flex; align-items: center; width: 100%; text-align: left; }
+  .detail .tx { flex: 1; }
+  .detail .l { font-size: 14px; line-height: 17px; color: var(--ink-2); }
+  .detail.fb { margin-top: 30px; }
+  .fb-row { margin-top: 8px; display: flex; align-items: center; height: 17px; font-size: 14px; line-height: 14px; }
+  .fb-row svg { width: 16px; height: 16px; margin-right: 8px; }
+  .fb-row .n { margin-right: 12px; min-width: 10px; }
+  .detail.lim { margin-top: 24px; }
+  .detail.lim .v { margin-top: 9px; font-size: 14px; line-height: 14px; font-weight: 700; }
+  .tell {
+    margin-top: 62px; width: 100%; height: 56px; background: var(--surface-2); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 9px; font-size: 14px; line-height: 14px;
+  }
+  .tell svg { width: 22px; height: 18px; }
+  .end { height: 211px; }
+
+  /* ---------- fixed bottom ---------- */
+  .bottom { position: absolute; left: 0; right: 0; bottom: 0; height: 190px; z-index: 6; pointer-events: none; }
+  .bottom .fade { position: absolute; left: 0; right: 0; bottom: 0; top: 92px; background: rgba(255,255,255,.6);
+    -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 24px); mask-image: linear-gradient(to bottom, transparent 0, #000 24px); }
+  .list-btn {
+    pointer-events: auto; position: absolute; left: 16px; right: 16px; top: 43px; height: 48px; border-radius: 24px; background: var(--blue); color: #fff;
+    font-size: 16px; line-height: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 9px; letter-spacing: -.1px;
+  }
+  .list-btn svg { width: 17px; height: 15px; }
+  .tabbar {
+    pointer-events: auto; position: absolute; left: 21px; width: 360px; top: 107px; height: 62px; border-radius: 31px;
+    background: linear-gradient(to bottom, #f8f8f9, #fdfdfd); border: .5px solid #e3e3e3;
+    box-shadow: 0 4px 12px rgba(0,0,0,.06); display: flex; padding: 2px 8px; isolation: isolate;
+  }
+  .tab { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; padding-top: 9px; color: #0f0f0f; }
+  .tab.sel::before { content: ""; position: absolute; inset: 0 -3.6px; border-radius: 29px; background: var(--pill); z-index: -1; }
+  .tab svg { width: 25px; height: 25px; }
+  .tab .l { margin-top: 5px; font-size: 9px; line-height: 9px; letter-spacing: .1px; }
+  .tab .b { position: absolute; left: 50%; margin-left: 6px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--red); color: #fff;
+    font-size: 9px; line-height: 16px; font-weight: 700; text-align: center; }
+
+  /* ---------- editable ---------- */
+  /* ---------- edit sheet ---------- */
+  .sheet-bg { position: absolute; inset: 0; z-index: 20; background: rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .25s; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 21; background: #fff; border-radius: 20px 20px 0 0;
+    padding: 12px 16px 34px; transform: translateY(105%); transition: transform .3s cubic-bezier(.2,.8,.2,1); max-height: 92%; overflow-y: auto; }
+  .screen.open .sheet-bg { opacity: 1; pointer-events: auto; }
+  .screen.open .sheet { transform: none; }
+  .sheet .grab { width: 36px; height: 5px; border-radius: 3px; background: #d8d8d8; margin: 0 auto 18px; }
+  .sheet h2 { margin: 0 0 18px; }
+  .field { display: block; margin-bottom: 14px; }
+  .field span { display: block; font-size: 12px; line-height: 12px; color: var(--ink-2); margin-bottom: 6px; }
+  .field input { width: 100%; height: 48px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--surface-2);
+    font: inherit; font-size: 16px; color: var(--ink); padding: 0 14px; outline: none; -webkit-appearance: none; appearance: none; }
+  .field input:focus { border-color: var(--blue); background: #fff; }
+  .field .pre { position: relative; }
+  .field .pre::before { content: "£"; position: absolute; left: 14px; top: 0; line-height: 48px; font-size: 16px; color: var(--ink); }
+  .field .pre input { padding-left: 28px; }
+  .fb3 { display: flex; gap: 8px; }
+  .fb3 .field { flex: 1; }
+  .sheet .save { margin-top: 10px; width: 100%; height: 48px; border-radius: 24px; background: var(--blue); color: #fff; font-size: 16px; font-weight: 700; }
+  .sheet .cancel { margin-top: 8px; width: 100%; height: 44px; font-size: 16px; color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="scroll" id="scroll">
+    <div class="top">
+      <div class="statusbar" aria-hidden="true">
+        <div class="time">15:42</div>
+        <div class="right">
+          <svg width="19" height="12" viewBox="0 0 19 12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="#000"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="#000"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="#000" opacity=".25"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="#000" opacity=".25"/></svg>
+          <svg width="18" height="13" viewBox="0 0 18 13"><path d="M9 12.4 11.3 9.6a3.3 3.3 0 0 0-4.6 0L9 12.4Z" fill="#000"/><path d="M4.6 7.2a6.4 6.4 0 0 1 8.8 0l1.6-1.9a8.9 8.9 0 0 0-12 0l1.6 1.9Z" fill="#000"/><path d="M1.5 3.9a11 11 0 0 1 15 0L18 2A13.6 13.6 0 0 0 0 2l1.5 1.9Z" fill="#000"/></svg>
+          <svg width="30" height="14" viewBox="0 0 30 14"><rect x="0" y="0" width="26" height="14" rx="4.5" fill="#000"/><path d="M27.3 4.6v4.8a2.4 2.4 0 0 0 0-4.8Z" fill="#000" opacity=".4"/><text x="13" y="10.6" text-anchor="middle" font-family="-apple-system,Helvetica,Arial" font-size="10.5" font-weight="700" fill="#fff">61</text></svg>
+        </div>
+      </div>
+      <div class="header">
+        <h1>Selling</h1>
+        <button class="cart" id="cart" aria-label="Edit values">
+          <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="#191919" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.6h2.3l2.1 9.9h9.3l1.9-6.9H4.6"/><circle cx="6.6" cy="15.4" r="1.2" fill="#191919"/><circle cx="13.6" cy="15.4" r="1.2" fill="#191919"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <section class="band">
+      <div class="label">YEAR-TO-DATE TOTAL
+        <svg viewBox="0 0 16 16" fill="none" stroke="#191919" stroke-width="1.4"><circle cx="8" cy="8" r="7.2"/><path d="M8 7v4.3" stroke-linecap="round"/><circle cx="8" cy="4.7" r=".9" fill="#191919" stroke="none"/></svg>
+      </div>
+      <div class="total">£<span class="ed" inputmode="decimal" data-key="ytd">291</span></div>
+      <div class="stats">
+        <div class="stat"><div class="k">ACTIVE</div><div class="v"><span class="ed" inputmode="numeric" data-key="active">4</span></div></div>
+        <div class="stat"><div class="k">ORDERS</div><div class="v"><span class="ed" inputmode="numeric" data-key="orders">35</span></div></div>
+        <div class="stat"><div class="k">INACTIVE</div><div class="v">0</div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Tasks<span class="dot">·</span>2</h2>
+      <div class="tasks">
+        <button class="task"><span class="t">Buyer paid - send now</span><span class="n badge"><span class="ed" inputmode="numeric" data-key="buyerPaid">35</span></span></button>
+        <button class="task"><span class="t">Send offer to buyers</span><span class="n">1</span></button>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Payments</h2>
+      <button class="funds">
+        <span class="ic">
+          <svg width="22" height="20" viewBox="0 0 22 20" fill="none" stroke="#191919" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M1 3.4v13.1a2.5 2.5 0 0 0 2.5 2.5h15a2.5 2.5 0 0 0 2.5-2.5V8.9a2.5 2.5 0 0 0-2.5-2.5H3.5A2.5 2.5 0 0 1 1 3.9 2.5 2.5 0 0 1 3.5 1.4H17"/><path d="M21 10.6h-3.5a2 2 0 0 0 0 4H21"/><circle cx="17.6" cy="12.6" r=".9" fill="#191919" stroke="none"/></svg>
+        </span>
+        <span class="tx"><div class="l">Your total funds</div><div class="v">£<span class="ed" inputmode="decimal" data-key="funds">235.15</span></div></span>
+        <svg class="chev" viewBox="0 0 8 14" fill="none" stroke="#191919" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6-6 6"/></svg>
+      </button>
+
+      <div class="card-blue">
+        <h3>Find out what your items are worth</h3>
+        <p>See pricing and sales insights for items that recently sold on&nbsp;e&#66;ay.</p>
+        <button class="research">
+          <svg viewBox="0 0 23 22" fill="none" stroke="#191919" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 20.5H3.2A2.2 2.2 0 0 1 1 18.3V3.2A2.2 2.2 0 0 1 3.2 1h10.6A2.2 2.2 0 0 1 16 3.2V9"/><path d="M4.5 6h8M4.5 10h5M4.5 14h4"/><circle cx="16.2" cy="14.4" r="4"/><path d="M19.2 17.4l2.8 2.8"/></svg>
+          Research products
+        </button>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="hd-head">
+        <h2>Sell items in high-demand categories</h2>
+        <button class="close" aria-label="Dismiss"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#191919" stroke-width="2" stroke-linecap="round"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+      </div>
+      <p class="hd-sub">Search activity on e&#66;ay from the past <b>30 days</b> shows these categories are in high demand.</p>
+      <div class="cats">
+        <div class="cat">
+          <div class="img-back"></div><img class="img" src="assets/cards.jpg" alt="">
+          <div class="rank"><svg viewBox="0 0 14 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7.5 5.2 3.3l3 3L13 1.5"/><path d="M9.3 1.5H13v3.7"/></svg>#1 IN SEARCH</div>
+          <div class="name">CCG Individual Cards</div>
+          <div class="meta">5.7m searches<br><b>£1.97</b> avg. sold price</div>
+          <button class="start"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M1.5 7.2V2.3a.8.8 0 0 1 .8-.8h4.9c.3 0 .6.1.8.3l6.7 6.7a1 1 0 0 1 0 1.4l-4.6 4.6a1 1 0 0 1-1.4 0L1.8 7.8a.9.9 0 0 1-.3-.6Z"/><circle cx="5" cy="5" r="1" fill="currentColor" stroke="none"/></svg>Start a listing</button>
+        </div>
+        <div class="cat">
+          <div class="img-back"></div><img class="img" src="assets/watch.jpg" alt="">
+          <div class="rank"><svg viewBox="0 0 14 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7.5 5.2 3.3l3 3L13 1.5"/><path d="M9.3 1.5H13v3.7"/></svg>#2 IN SEARCH</div>
+          <div class="name">Wristwatches</div>
+          <div class="meta">3.7m searches<br><b>£210.81</b> avg. sold price</div>
+          <button class="start"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M1.5 7.2V2.3a.8.8 0 0 1 .8-.8h4.9c.3 0 .6.1.8.3l6.7 6.7a1 1 0 0 1 0 1.4l-4.6 4.6a1 1 0 0 1-1.4 0L1.8 7.8a.9.9 0 0 1-.3-.6Z"/><circle cx="5" cy="5" r="1" fill="currentColor" stroke="none"/></svg>Start a listing</button>
+        </div>
+        <div class="cat">
+          <div class="img-back"></div><img class="img" src="assets/dress.jpg" alt="">
+          <div class="rank"><svg viewBox="0 0 14 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7.5 5.2 3.3l3 3L13 1.5"/><path d="M9.3 1.5H13v3.7"/></svg>#3 IN SEARCH</div>
+          <div class="name">Dresses</div>
+          <div class="meta">3.7m searches<br><b>£15.80</b> avg. sold price</div>
+          <button class="start"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M1.5 7.2V2.3a.8.8 0 0 1 .8-.8h4.9c.3 0 .6.1.8.3l6.7 6.7a1 1 0 0 1 0 1.4l-4.6 4.6a1 1 0 0 1-1.4 0L1.8 7.8a.9.9 0 0 1-.3-.6Z"/><circle cx="5" cy="5" r="1" fill="currentColor" stroke="none"/></svg>Start a listing</button>
+        </div>
+      </div>
+      <button class="showmore">Show more <svg viewBox="0 0 14 8" fill="none" stroke="#191919" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6 6-6"/></svg></button>
+    </section>
+
+    <section class="section">
+      <h2>Selling tools</h2>
+      <div class="tools-wrap">
+        <div class="tools">
+          <button class="tool"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M12 1.8l2.3 1.9 2.9-.6.9 2.8 2.7 1.3-.7 2.9 1.9 2.3-1.9 2.3.7 2.9-2.7 1.3-.9 2.8-2.9-.6L12 22.2l-2.3-1.9-2.9.6-.9-2.8-2.7-1.3.7-2.9L2 11.6l1.9-2.3-.7-2.9 2.7-1.3.9-2.8 2.9.6L12 1.8Z"/><path d="M9 15l6-6"/><circle cx="9.3" cy="9.3" r="1.1"/><circle cx="14.7" cy="14.7" r="1.1"/></svg></span><span class="l">Offers</span></button>
+          <button class="tool"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="1.6" stroke-linejoin="round"><path d="M3 10.5V4.2A1.2 1.2 0 0 1 4.2 3h6.3c.3 0 .6.1.8.4l8.7 8.7a1.2 1.2 0 0 1 0 1.7l-6 6a1.2 1.2 0 0 1-1.7 0l-8.7-8.7a1.2 1.2 0 0 1-.3-.6Z"/><path d="M7.5 2.5V1.4c0-.2.2-.4.4-.4h5.6c.3 0 .6.1.8.4l8.4 8.4"/><circle cx="7.5" cy="7.5" r="1.2" fill="#191919" stroke="none"/></svg></span><span class="l">Bundles</span></button>
+          <button class="tool"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="1.8" stroke-linecap="round"><path d="M4.5 12v8M9.5 6v14M14.5 10v10M19.5 3v17"/></svg></span><span class="l">Performance</span></button>
+          <button class="tool"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 22H4.2A2.2 2.2 0 0 1 2 19.8V4.2A2.2 2.2 0 0 1 4.2 2h11.6A2.2 2.2 0 0 1 18 4.2V10"/><path d="M5.5 7h8M5.5 11h5M5.5 15h4"/><circle cx="17" cy="15.8" r="4"/><path d="M20 18.8l2.6 2.6"/></svg></span><span class="l">Research</span></button>
+          <button class="tool"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5v5a1 1 0 0 0 1 1h3l9 5V3.5l-9 5H4a1 1 0 0 0-1 1Z"/><path d="M7 15.5l1.5 5.5h3l-1.6-5.5"/><path d="M19.5 9a3.5 3.5 0 0 1 0 6"/></svg></span><span class="l">Advertising</span></button>
+          <button class="tool"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="19" height="17" rx="2"/><path d="M2.5 9h19M7 1.5v4M17 1.5v4"/></svg></span><span class="l">Promotions</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Selling details</h2>
+      <button class="detail fb">
+        <span class="tx">
+          <div class="l">Feedback (last 30 days)</div>
+          <div class="fb-row">
+            <svg viewBox="0 0 16 16" id="fbPosIcon"><circle cx="8" cy="8" r="8" fill="#191919"/><path d="M8 4.3v7.4M4.3 8h7.4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span class="n"><span class="ed" inputmode="numeric" data-key="fbPos">0</span></span>
+            <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#191919"/><circle cx="8" cy="8" r="2.4" fill="#fff"/></svg><span class="n"><span class="ed" inputmode="numeric" data-key="fbNeu">0</span></span>
+            <svg viewBox="0 0 16 16" id="fbNegIcon"><circle cx="8" cy="8" r="8" fill="#191919"/><path d="M4.3 8h7.4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span class="n"><span class="ed" inputmode="numeric" data-key="fbNeg">0</span></span>
+          </div>
+        </span>
+        <svg class="chev" viewBox="0 0 8 14" fill="none" stroke="#191919" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6-6 6"/></svg>
+      </button>
+      <button class="detail lim">
+        <span class="tx">
+          <div class="l">Remaining selling limit</div>
+          <div class="v">£377,708.54 | 49,933 items</div>
+        </span>
+        <svg class="chev" viewBox="0 0 8 14" fill="none" stroke="#191919" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6-6 6"/></svg>
+      </button>
+      <button class="tell">
+        <svg viewBox="0 0 22 18" fill="none" stroke="#191919" stroke-width="1.7" stroke-linejoin="round"><rect x="1" y="1" width="20" height="16" rx="2"/><path d="M1.5 2.5 11 10l9.5-7.5"/></svg>
+        Tell us what you think
+      </button>
+      <div class="end"></div>
+    </section>
+  </div>
+
+  <div class="bottom">
+    <div class="fade"></div>
+    <button class="list-btn">
+      <svg viewBox="0 0 17 15" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M1 5.2A1.2 1.2 0 0 1 2.2 4h2.3l1.3-2h4.4l1.3 2h.5"/><path d="M1 5.2v7.6A1.2 1.2 0 0 0 2.2 14h11.6a1.2 1.2 0 0 0 1.2-1.2V8.2"/><circle cx="8" cy="9" r="2.8"/><path d="M14.2 1v4M12.2 3h4"/></svg>
+      List an item
+    </button>
+    <nav class="tabbar">
+      <button class="tab"><svg viewBox="0 0 22 22" fill="none" stroke="#0f0f0f" stroke-width="1.7" stroke-linejoin="round"><path d="M2.5 9.5 11 2.5l8.5 7v9.5a1 1 0 0 1-1 1h-4.5v-6h-6v6H3.5a1 1 0 0 1-1-1V9.5Z"/></svg><span class="l">Home</span></button>
+      <button class="tab"><span class="b">4</span><svg viewBox="0 0 22 22" fill="none" stroke="#0f0f0f" stroke-width="1.7" stroke-linejoin="round"><circle cx="11" cy="11" r="9.3"/><circle cx="11" cy="8.6" r="3.2"/><path d="M4.6 17.5c1.3-2.6 3.6-4 6.4-4s5.1 1.4 6.4 4" stroke-linecap="round"/></svg><span class="l">My e&#66;ay</span></button>
+      <button class="tab"><svg viewBox="0 0 22 22" fill="none" stroke="#0f0f0f" stroke-width="1.8" stroke-linecap="round"><circle cx="9.5" cy="9.5" r="7.3"/><path d="M15 15l5.5 5.5"/></svg><span class="l">Search</span></button>
+      <button class="tab"><svg viewBox="0 0 22 22" fill="none" stroke="#0f0f0f" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="2" fill="#0f0f0f" stroke="none"/><path d="M7.5 14.5a5 5 0 0 1 0-7M14.5 7.5a5 5 0 0 1 0 7M4.3 17.7a9.5 9.5 0 0 1 0-13.4M17.7 4.3a9.5 9.5 0 0 1 0 13.4"/></svg><span class="l">Live</span></button>
+      <button class="tab sel"><svg viewBox="0 0 22 22"><path d="M2 10V3.3C2 2.6 2.6 2 3.3 2H10c.4 0 .7.1 1 .4l8.8 8.8a1.4 1.4 0 0 1 0 2L13.2 19.8a1.4 1.4 0 0 1-2 0L2.4 11c-.3-.3-.4-.6-.4-1Z" fill="#0f0f0f"/><circle cx="6.5" cy="6.5" r="1.5" fill="#fff"/></svg><span class="l">Selling</span></button>
+    </nav>
+  </div>
+  <div class="sheet-bg" id="sheetBg"></div>
+  <form class="sheet" id="sheet" autocomplete="off">
+    <div class="grab"></div>
+    <h2>Edit values</h2>
+    <label class="field"><span>YEAR-TO-DATE TOTAL</span><div class="pre"><input name="ytd" inputmode="decimal"></div></label>
+    <label class="field"><span>ACTIVE</span><input name="active" inputmode="numeric"></label>
+    <label class="field"><span>ORDERS</span><input name="orders" inputmode="numeric"></label>
+    <label class="field"><span>BUYER PAID - SEND NOW</span><input name="buyerPaid" inputmode="numeric"></label>
+    <label class="field"><span>YOUR TOTAL FUNDS</span><div class="pre"><input name="funds" inputmode="decimal"></div></label>
+    <div class="fb3">
+      <label class="field"><span>FEEDBACK +</span><input name="fbPos" inputmode="numeric"></label>
+      <label class="field"><span>FEEDBACK ●</span><input name="fbNeu" inputmode="numeric"></label>
+      <label class="field"><span>FEEDBACK −</span><input name="fbNeg" inputmode="numeric"></label>
+    </div>
+    <button type="submit" class="save">Save</button>
+    <button type="button" class="cancel" id="cancel">Cancel</button>
+  </form>
+</div>
+
+<script>
+(function () {
+  var KEY = 'selling-dashboard-values';
+  var screen = document.querySelector('.screen');
+  var sheet = document.getElementById('sheet');
+  var eds = document.querySelectorAll('.ed');
+  var values = {};
+  eds.forEach(function (el) { values[el.dataset.key] = el.textContent; });
+  try { Object.assign(values, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+
+  function render() {
+    eds.forEach(function (el) { el.textContent = values[el.dataset.key]; });
+    document.querySelector('#fbPosIcon circle').setAttribute('fill', parseFloat(values.fbPos) > 0 ? '#3a8a3e' : '#191919');
+    document.querySelector('#fbNegIcon circle').setAttribute('fill', parseFloat(values.fbNeg) > 0 ? '#c32c20' : '#191919');
+  }
+  function open() {
+    Object.keys(values).forEach(function (k) { if (sheet.elements[k]) sheet.elements[k].value = values[k]; });
+    screen.classList.add('open');
+  }
+  function close() { screen.classList.remove('open'); }
+
+  document.getElementById('cart').addEventListener('click', open);
+  document.getElementById('sheetBg').addEventListener('click', close);
+  document.getElementById('cancel').addEventListener('click', close);
+  sheet.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    Object.keys(values).forEach(function (k) {
+      var v = sheet.elements[k].value.trim();
+      values[k] = v === '' ? '0' : v;
+    });
+    try { localStorage.setItem(KEY, JSON.stringify(values)); } catch (e) {}
+    render();
+    close();
+  });
+  render();
+  if (location.hash === '#open') open();
+
+  // ?scroll=N for screenshots / testing
+  var m = location.search.match(/scroll=(\d+)/);
+  if (m) { document.documentElement.classList.add('capture'); document.getElementById('scroll').scrollTop = +m[1]; }
+})();
+</script>
+</body>
+</html>
