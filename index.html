@@ -212,7 +212,7 @@
       <div class="stats">
         <div class="stat"><div class="k">ACTIVE</div><div class="v"><span data-key="active"></span></div></div>
         <div class="stat"><div class="k">ORDERS</div><div class="v"><span data-key="orders"></span></div></div>
-        <div class="stat"><div class="k">INACTIVE</div><div class="v">0</div></div>
+        <div class="stat"><div class="k">INACTIVE</div><div class="v"><span data-key="inactive"></span></div></div>
       </div>
     </section>
 
@@ -515,10 +515,13 @@
     // listings with interested buyers you can send an offer to: a few percent of active, drifting day to day
     var dk = dayNum(now), f = (now - startOfDay(now)) / DAY;
     var offers = Math.max(1, Math.round((active + offset) * (offerShare(dk) * (1 - f) + offerShare(dk + 1) * f)));
+    // inactive: ended and out-of-stock listings, a few percent of active, plus anything a stock-out has taken offline
+    var inactive = Math.round((active + offset) * (inactiveShare(dk) * (1 - f) + inactiveShare(dk + 1) * f)) + Math.max(0, -offset);
     // the app drops the pence from the year-to-date total once it passes £100, rounding down
-    return { ytd: ytd > 100 ? fmtInt(Math.floor(ytd)) : fmtMoney(ytd), active: fmtK(Math.max(0, active + offset)), orders: fmtK(ytdOrders), buyerPaid: fmtInt(today), offers: fmtInt(offers),
+    return { ytd: ytd > 100 ? fmtInt(Math.floor(ytd)) : fmtMoney(ytd), active: fmtK(Math.max(0, active + offset)), inactive: fmtK(inactive), orders: fmtK(ytdOrders), buyerPaid: fmtInt(today), offers: fmtInt(offers),
       funds: fmtMoney(funds), fbPos: fmtInt(fbPos), fbNeu: fmtInt(fbNeu), fbNeg: fmtInt(fbNeg) };
   }
+  function inactiveShare(dayKey) { var r = rng((SEED * 2971215073 + dayKey * 2654435761 + 9) >>> 0); return 0.02 + r() * 0.04; }
   function offerShare(dayKey) { var r = rng((SEED * 1181783497 + dayKey * 2654435761 + 5) >>> 0); return 0.03 + r() * 0.05; }
   // the stat tiles abbreviate thousands: 1209 shows as 1.2k+
   function fmtK(n) { return n < 1000 ? String(n) : (Math.floor(n / 100) / 10).toFixed(1).replace(/\.0$/, '') + 'k+'; }
