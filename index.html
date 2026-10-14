@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Selling</title>
-<link rel="icon" href="data:,">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icon.svg">
 <style>
   @font-face { font-family: "UI Sans"; font-weight: 400; font-style: normal; font-display: block;
     src: url("assets/fonts/ui-regular.woff2") format("woff2"); }
@@ -57,15 +58,9 @@
   button, .btn { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   svg { display: block; }
 
-  /* ---------- status bar + header (sticky) ---------- */
-  .top { position: sticky; top: 0; z-index: 5; background: #fff; }
-  .statusbar {
-    height: 59px; position: relative;
-    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-  }
-  .statusbar .time { position: absolute; left: 48px; top: 20px; font-size: 17px; font-weight: 600; letter-spacing: -.2px; line-height: 22px; color: #000; display: flex; align-items: center; gap: 7px; }
-  .statusbar .time::after { content: ""; width: 13px; height: 13px; border-radius: 50%; background: #000; display: inline-block; }
-  .statusbar .right { position: absolute; right: 36px; top: 23px; display: flex; align-items: center; gap: 7px; }
+  /* ---------- header (sticky; the device draws its own status bar above it) ---------- */
+  .top { position: sticky; top: 0; z-index: 5; background: #fff; padding-top: env(safe-area-inset-top, 0px); }
+  html.capture .top { padding-top: 59px; }
   .header { height: 57px; position: relative; }
   .header h1 { position: absolute; left: 16px; top: 15px; font-size: 20px; line-height: 20px; font-weight: 700; letter-spacing: -.1px; }
   .cart {
@@ -191,59 +186,15 @@
   .tab .b { position: absolute; left: 50%; margin-left: 6px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--red); color: #fff;
     font-size: 9px; line-height: 16px; font-weight: 700; text-align: center; }
 
-  /* ---------- editable ---------- */
-  /* ---------- edit sheet ---------- */
-  .sheet-bg { position: absolute; inset: 0; z-index: 20; background: rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .25s; }
-  .sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 21; background: #fff; border-radius: 20px 20px 0 0;
-    padding: 12px 16px 34px; transform: translateY(105%); transition: transform .3s cubic-bezier(.2,.8,.2,1); max-height: 92%; overflow-y: auto; }
-  .screen.open .sheet-bg { opacity: 1; pointer-events: auto; }
-  .screen.open .sheet { transform: none; }
-  .sheet .grab { width: 36px; height: 5px; border-radius: 3px; background: #d8d8d8; margin: 0 auto 18px; }
-  .sheet h2 { margin: 0 0 18px; }
-  .field { display: block; margin-bottom: 14px; }
-  .field span { display: block; font-size: 12px; line-height: 12px; color: var(--ink-2); margin-bottom: 6px; }
-  .field input { width: 100%; height: 48px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--surface-2);
-    font: inherit; font-size: 16px; color: var(--ink); padding: 0 14px; outline: none; -webkit-appearance: none; appearance: none; }
-  .field input:focus { border-color: var(--blue); background: #fff; }
-  .field .pre { position: relative; }
-  .field .pre::before { content: "£"; position: absolute; left: 14px; top: 0; line-height: 48px; font-size: 16px; color: var(--ink); }
-  .field .pre input { padding-left: 28px; }
-  .fb3 { display: flex; gap: 8px; }
-  .fb3 .field { flex: 1; }
-  .sheet .save { margin-top: 10px; width: 100%; height: 48px; border-radius: 24px; background: var(--blue); color: #fff; font-size: 16px; font-weight: 700; }
-  .sheet .cancel { margin-top: 8px; width: 100%; height: 44px; font-size: 16px; color: var(--ink); }
-  .auto { margin: 4px 0 14px; padding: 14px; border-radius: 12px; background: var(--surface-blue); }
-  .auto .sw { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-  .auto .sw b { font-size: 16px; }
-  .auto .sw small { display: block; font-size: 12px; color: var(--ink-2); margin-top: 3px; }
-  .auto .sw input { position: absolute; opacity: 0; width: 0; height: 0; }
-  .auto .knob { flex: none; width: 48px; height: 28px; border-radius: 14px; background: #c9c9c9; position: relative; transition: background .2s; }
-  .auto .knob::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
-  .auto .sw input:checked + .knob { background: var(--green); }
-  .auto .sw input:checked + .knob::after { transform: translateX(20px); }
-  .auto .opts { display: none; margin-top: 14px; }
-  .auto.on .opts { display: block; }
-  .auto .two { display: flex; gap: 8px; }
-  .auto .two .field { flex: 1; }
-  .auto .opts .field:last-child { margin-bottom: 0; }
-  .auto .note { font-size: 12px; line-height: 16px; color: var(--ink-2); margin-top: 10px; }
 </style>
 </head>
 <body>
 <div class="screen">
   <div class="scroll" id="scroll">
     <div class="top">
-      <div class="statusbar" aria-hidden="true">
-        <div class="time">15:42</div>
-        <div class="right">
-          <svg width="19" height="12" viewBox="0 0 19 12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="#000"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="#000"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="#000" opacity=".25"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="#000" opacity=".25"/></svg>
-          <svg width="18" height="13" viewBox="0 0 18 13"><path d="M9 12.4 11.3 9.6a3.3 3.3 0 0 0-4.6 0L9 12.4Z" fill="#000"/><path d="M4.6 7.2a6.4 6.4 0 0 1 8.8 0l1.6-1.9a8.9 8.9 0 0 0-12 0l1.6 1.9Z" fill="#000"/><path d="M1.5 3.9a11 11 0 0 1 15 0L18 2A13.6 13.6 0 0 0 0 2l1.5 1.9Z" fill="#000"/></svg>
-          <svg width="30" height="14" viewBox="0 0 30 14"><rect x="0" y="0" width="26" height="14" rx="4.5" fill="#000"/><path d="M27.3 4.6v4.8a2.4 2.4 0 0 0 0-4.8Z" fill="#000" opacity=".4"/><text x="13" y="10.6" text-anchor="middle" font-family="-apple-system,Helvetica,Arial" font-size="10.5" font-weight="700" fill="#fff">61</text></svg>
-        </div>
-      </div>
       <div class="header">
         <h1>Selling</h1>
-        <button class="cart" id="cart" aria-label="Edit values">
+        <button class="cart" aria-label="Cart">
           <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="#191919" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.6h2.3l2.1 9.9h9.3l1.9-6.9H4.6"/><circle cx="6.6" cy="15.4" r="1.2" fill="#191919"/><circle cx="13.6" cy="15.4" r="1.2" fill="#191919"/></svg>
         </button>
       </div>
@@ -253,10 +204,10 @@
       <div class="label">YEAR-TO-DATE TOTAL
         <svg viewBox="0 0 16 16" fill="none" stroke="#191919" stroke-width="1.4"><circle cx="8" cy="8" r="7.2"/><path d="M8 7v4.3" stroke-linecap="round"/><circle cx="8" cy="4.7" r=".9" fill="#191919" stroke="none"/></svg>
       </div>
-      <div class="total">£<span class="ed" inputmode="decimal" data-key="ytd">291</span></div>
+      <div class="total">£<span data-key="ytd"></span></div>
       <div class="stats">
-        <div class="stat"><div class="k">ACTIVE</div><div class="v"><span class="ed" inputmode="numeric" data-key="active">4</span></div></div>
-        <div class="stat"><div class="k">ORDERS</div><div class="v"><span class="ed" inputmode="numeric" data-key="orders">35</span></div></div>
+        <div class="stat"><div class="k">ACTIVE</div><div class="v"><span data-key="active"></span></div></div>
+        <div class="stat"><div class="k">ORDERS</div><div class="v"><span data-key="orders"></span></div></div>
         <div class="stat"><div class="k">INACTIVE</div><div class="v">0</div></div>
       </div>
     </section>
@@ -264,7 +215,7 @@
     <section class="section">
       <h2>Tasks<span class="dot">·</span>2</h2>
       <div class="tasks">
-        <button class="task"><span class="t">Buyer paid - send now</span><span class="n badge"><span class="ed" inputmode="numeric" data-key="buyerPaid">35</span></span></button>
+        <button class="task"><span class="t">Buyer paid - send now</span><span class="n badge"><span data-key="buyerPaid"></span></span></button>
         <button class="task"><span class="t">Send offer to buyers</span><span class="n">1</span></button>
       </div>
     </section>
@@ -275,7 +226,7 @@
         <span class="ic">
           <svg width="22" height="20" viewBox="0 0 22 20" fill="none" stroke="#191919" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M1 3.4v13.1a2.5 2.5 0 0 0 2.5 2.5h15a2.5 2.5 0 0 0 2.5-2.5V8.9a2.5 2.5 0 0 0-2.5-2.5H3.5A2.5 2.5 0 0 1 1 3.9 2.5 2.5 0 0 1 3.5 1.4H17"/><path d="M21 10.6h-3.5a2 2 0 0 0 0 4H21"/><circle cx="17.6" cy="12.6" r=".9" fill="#191919" stroke="none"/></svg>
         </span>
-        <span class="tx"><div class="l">Your total funds</div><div class="v">£<span class="ed" inputmode="decimal" data-key="funds">235.15</span></div></span>
+        <span class="tx"><div class="l">Your total funds</div><div class="v">£<span data-key="funds"></span></div></span>
         <svg class="chev" viewBox="0 0 8 14" fill="none" stroke="#191919" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6-6 6"/></svg>
       </button>
 
@@ -341,9 +292,9 @@
         <span class="tx">
           <div class="l">Feedback (last 30 days)</div>
           <div class="fb-row">
-            <svg viewBox="0 0 16 16" id="fbPosIcon"><circle cx="8" cy="8" r="8" fill="#191919"/><path d="M8 4.3v7.4M4.3 8h7.4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span class="n"><span class="ed" inputmode="numeric" data-key="fbPos">0</span></span>
-            <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#191919"/><circle cx="8" cy="8" r="2.4" fill="#fff"/></svg><span class="n"><span class="ed" inputmode="numeric" data-key="fbNeu">0</span></span>
-            <svg viewBox="0 0 16 16" id="fbNegIcon"><circle cx="8" cy="8" r="8" fill="#191919"/><path d="M4.3 8h7.4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span class="n"><span class="ed" inputmode="numeric" data-key="fbNeg">0</span></span>
+            <svg viewBox="0 0 16 16" id="fbPosIcon"><circle cx="8" cy="8" r="8" fill="#191919"/><path d="M8 4.3v7.4M4.3 8h7.4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span class="n"><span data-key="fbPos"></span></span>
+            <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#191919"/><circle cx="8" cy="8" r="2.4" fill="#fff"/></svg><span class="n"><span data-key="fbNeu"></span></span>
+            <svg viewBox="0 0 16 16" id="fbNegIcon"><circle cx="8" cy="8" r="8" fill="#191919"/><path d="M4.3 8h7.4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span class="n"><span data-key="fbNeg"></span></span>
           </div>
         </span>
         <svg class="chev" viewBox="0 0 8 14" fill="none" stroke="#191919" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6-6 6"/></svg>
@@ -377,61 +328,24 @@
       <button class="tab sel"><svg viewBox="0 0 22 22"><path d="M2 10V3.3C2 2.6 2.6 2 3.3 2H10c.4 0 .7.1 1 .4l8.8 8.8a1.4 1.4 0 0 1 0 2L13.2 19.8a1.4 1.4 0 0 1-2 0L2.4 11c-.3-.3-.4-.6-.4-1Z" fill="#0f0f0f"/><circle cx="6.5" cy="6.5" r="1.5" fill="#fff"/></svg><span class="l">Selling</span></button>
     </nav>
   </div>
-  <div class="sheet-bg" id="sheetBg"></div>
-  <form class="sheet" id="sheet" autocomplete="off">
-    <div class="grab"></div>
-    <h2>Edit values</h2>
-    <label class="field"><span>YEAR-TO-DATE TOTAL</span><div class="pre"><input name="ytd" inputmode="decimal"></div></label>
-    <label class="field"><span>ACTIVE</span><input name="active" inputmode="numeric"></label>
-    <label class="field"><span>ORDERS</span><input name="orders" inputmode="numeric"></label>
-    <label class="field"><span>BUYER PAID - SEND NOW</span><input name="buyerPaid" inputmode="numeric"></label>
-    <label class="field"><span>YOUR TOTAL FUNDS</span><div class="pre"><input name="funds" inputmode="decimal"></div></label>
-    <div class="auto" id="auto">
-      <label class="sw"><span><b>Automate daily</b><small>Simulates sales, orders, listings and funds each day</small></span><input type="checkbox" name="autoOn"><span class="knob"></span></label>
-      <div class="opts">
-        <label class="field"><span>MONTHLY SALES TARGET</span><div class="pre"><input name="monthly" inputmode="numeric"></div></label>
-        <div class="two">
-          <label class="field"><span>MIN PRICE</span><div class="pre"><input name="pMin" inputmode="decimal"></div></label>
-          <label class="field"><span>MAX PRICE</span><div class="pre"><input name="pMax" inputmode="decimal"></div></label>
-        </div>
-        <div class="two">
-          <label class="field"><span>USUAL LISTINGS MIN</span><input name="lMin" inputmode="numeric"></label>
-          <label class="field"><span>USUAL LISTINGS MAX</span><input name="lMax" inputmode="numeric"></label>
-        </div>
-        <label class="field"><span>FEES % (FUNDS = SALES 3 DAYS AGO MINUS FEES)</span><input name="fee" inputmode="decimal"></label>
-        <div class="note" id="autoNote"></div>
-      </div>
-    </div>
-    <div class="fb3">
-      <label class="field"><span>FEEDBACK +</span><input name="fbPos" inputmode="numeric"></label>
-      <label class="field"><span>FEEDBACK ●</span><input name="fbNeu" inputmode="numeric"></label>
-      <label class="field"><span>FEEDBACK −</span><input name="fbNeg" inputmode="numeric"></label>
-    </div>
-    <button type="submit" class="save">Save</button>
-    <button type="button" class="cancel" id="cancel">Cancel</button>
-  </form>
 </div>
 
 <script>
 (function () {
-  var KEY = 'selling-dashboard-values';
-  var AKEY = 'selling-dashboard-auto';
-  var screen = document.querySelector('.screen');
-  var sheet = document.getElementById('sheet');
-  var autoBox = document.getElementById('auto');
-  var eds = document.querySelectorAll('.ed');
-  var values = {};
-  eds.forEach(function (el) { values[el.dataset.key] = el.textContent; });
-  try { Object.assign(values, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
-
-  // ---------- automation ----------
-  // `auto` holds the settings plus an anchor: the moment automation was saved and the year-to-date
-  // and listing figures at that moment. Every day's orders are generated deterministically from the
-  // seed with individual timestamps, so the dashboard can be read at any instant (or after days
-  // away) and shows the same figures for that instant. Nothing runs in the background.
-  var AUTO_DEFAULTS = { on: false, monthly: 60000, pMin: 5, pMax: 15, lMin: 500, lMax: 800, fee: 12.8, seed: 1 };
-  var auto = Object.assign({}, AUTO_DEFAULTS);
-  try { Object.assign(auto, JSON.parse(localStorage.getItem(AKEY) || '{}')); } catch (e) {}
+  // ---------- simulation ----------
+  // Everything on the dashboard is computed from a fixed seed and the clock, so the page shows the
+  // same figures for any given instant on any device, catches up on time away, and needs no input.
+  // The account has traded since before this year: year-to-date is the sum of simulated sales since
+  // 1 January. Listings and the feedback window are simulated from a little before that.
+  var SEED = 48271;
+  var REVENUE_LO = 30000, REVENUE_HI = 75000;      // monthly revenue drifts between these
+  var PRICE_LO = 5, PRICE_HI = 15;                 // most items; ~7% sell for more
+  var AVG_TICKET = 11.6;                           // expected gross per order with the tail
+  var LIST_LO = 1200, LIST_HI = 1800;              // usual active-listing band
+  var FVF = 0.128, PER_ORDER = 0.30;               // final value fee + fixed fee per order
+  var PROMOTED = 0.45, AD_LO = 0.04, AD_HI = 0.10; // share of orders via promoted listings, ad rate
+  var FEEDBACK_RATE = 0.24;                        // buyers who leave feedback
+  var FB_NEU = 0.007, FB_NEG = 0.010;              // share of feedback that is neutral / negative
 
   var DAY = 86400000;
   function startOfDay(t) { var d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); }
@@ -458,9 +372,23 @@
     return 23;
   }
 
-  // ---- regimes and shocks ----
-  // Slow demand drift: one factor per week, interpolated day to day, so sales have good and bad weeks.
-  function weekFactor(w) { return Math.exp(gauss(rng((auto.seed * 2246822519 + w * 3266489917 + 11) >>> 0)) * 0.11); }
+  // ---- revenue level ----
+  // Slow level: one value per calendar month, interpolated through the month, kept inside the
+  // revenue range (a smoothed random walk so good and bad months cluster rather than jump about).
+  function monthLevel(mi) { // mi = year * 12 + month
+    var r = rng((SEED * 1597334677 + mi * 2246822519 + 3) >>> 0);
+    var u = 0.5, i;
+    for (i = 0; i < 6; i++) u = Math.max(0.04, Math.min(0.96, u + gauss(rng((SEED * 374761393 + (mi - 5 + i) * 668265263 + 1) >>> 0)) * 0.28));
+    u = u * 0.85 + r() * 0.15;
+    return REVENUE_LO + (REVENUE_HI - REVENUE_LO) * u;
+  }
+  function levelFor(d0) {
+    var d = new Date(d0), mi = d.getFullYear() * 12 + d.getMonth();
+    var days = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate(), f = (d.getDate() - 0.5) / days;
+    return monthLevel(mi) * (1 - f) + monthLevel(mi + 1) * f;
+  }
+  // Weekly demand drift on top: one factor per week, interpolated day to day.
+  function weekFactor(w) { return Math.exp(gauss(rng((SEED * 2246822519 + w * 3266489917 + 11) >>> 0)) * 0.11); }
   function drift(dayKey) {
     var w = Math.floor(dayKey / 7), f = (dayKey - w * 7) / 7;
     return weekFactor(w) * (1 - f) + weekFactor(w + 1) * f;
@@ -470,7 +398,7 @@
   var blockCache = {};
   function shockBlock(b) {
     if (blockCache[b]) return blockCache[b];
-    var r = rng((auto.seed * 3812015801 + b * 2654435761 + 7) >>> 0);
+    var r = rng((SEED * 3812015801 + b * 2654435761 + 7) >>> 0);
     var days = {};
     function put(day, mult, delta, label) {
       var e = days[day] || (days[day] = { demand: 1, delta: 0, labels: [] });
@@ -488,13 +416,13 @@
     if (r() < 0.5) { // supply side
       var st2 = base + Math.floor(r() * 30);
       if (r() < 0.6) { // stock-out: listings fall, sit low, then come back as stock is relisted
-        var size = 60 + Math.floor(r() * 140), dDays = 2 + Math.floor(r() * 3), hold = 1 + Math.floor(r() * 4), rDays = 6 + Math.floor(r() * 9);
+        var size = 120 + Math.floor(r() * 280), dDays = 2 + Math.floor(r() * 3), hold = 1 + Math.floor(r() * 4), rDays = 6 + Math.floor(r() * 9);
         var m3 = 0.5 + r() * 0.25, d = st2;
         for (var a = 0; a < dDays; a++, d++) put(d, 1 + (m3 - 1) * ((a + 1) / dDays), -Math.round(size / dDays), 'stock-out');
         for (var h = 0; h < hold; h++, d++) put(d, m3, 0, 'stock-out');
         for (var c = 0; c < rDays; c++, d++) put(d, m3 + (1 - m3) * ((c + 1) / rDays), Math.round(size / rDays), 'restocking');
       } else { // restock: a batch of new listings that sells through over the following weeks
-        var size2 = 50 + Math.floor(r() * 100), up = 1 + Math.floor(r() * 3), sell = 14 + Math.floor(r() * 10), m4 = 1.1 + r() * 0.2, d2 = st2;
+        var size2 = 100 + Math.floor(r() * 200), up = 1 + Math.floor(r() * 3), sell = 14 + Math.floor(r() * 10), m4 = 1.1 + r() * 0.2, d2 = st2;
         for (var u = 0; u < up; u++, d2++) put(d2, m4, Math.round(size2 / up), 'new stock');
         for (var v = 0; v < sell; v++, d2++) put(d2, m4 - (m4 - 1) * ((v + 1) / sell), -Math.round(size2 / sell), 'selling through');
       }
@@ -513,36 +441,44 @@
     });
     return out;
   }
-  function regimeText(t) {
-    var key = dayNum(t), sh = shockFor(key), m = drift(key) * sh.demand;
-    var what = sh.labels.length ? sh.labels.join(', ') : (m > 1.08 ? 'strong week' : m < 0.92 ? 'soft week' : 'normal trading');
-    return 'Today: demand ' + m.toFixed(2) + '× (' + what + ')' + (sh.delta ? ', listings ' + (sh.delta > 0 ? '+' : '') + sh.delta : '') + '.';
+
+  // Price of one item: mostly £5–15 at .49/.99 price points, now and then something dearer.
+  function price(r) {
+    var x = r(), p;
+    if (x < 0.93) p = PRICE_LO + (PRICE_HI - PRICE_LO) * Math.min(1, Math.max(0, 0.5 + gauss(r) * 0.22));
+    else if (x < 0.99) p = PRICE_HI + r() * 25;          // £15–40
+    else p = 40 + Math.pow(r(), 2) * 110;                 // £40–150, skewed low
+    return Math.max(PRICE_LO, Math.round(p * 2) / 2 - 0.01);
   }
 
   // One simulated day: a time-sorted list of orders plus the moments the listing count changes.
   var dayCache = {};
-  function simDay(t) {
-    var d0 = startOfDay(t), key = dayNum(t);
+  function simDay(key) {
     if (dayCache[key]) return dayCache[key];
-    var r = rng((auto.seed * 2654435761 + key * 40503) >>> 0);
-    var pMin = Math.min(auto.pMin, auto.pMax), pMax = Math.max(auto.pMin, auto.pMax);
-    var avgTicket = (pMin + pMax) / 2;
-    var baseOrders = (auto.monthly / 30.4) / avgTicket;
+    var d0 = key * DAY + DAY / 2; d0 = startOfDay(d0);
+    var r = rng((SEED * 2654435761 + key * 40503) >>> 0);
     var sh = shockFor(key);
+    var baseOrders = (levelFor(d0) / 30.4) / AVG_TICKET;
     var n = Math.max(0, Math.round(baseOrders * DOW[new Date(d0).getDay()] * drift(key) * sh.demand * Math.exp(gauss(r) * 0.14)));
     var orders = [];
     for (var i = 0; i < n; i++) {
-      // most items cluster around the middle of the range, in 0.49/0.99 style price points
-      var p = pMin + (pMax - pMin) * Math.min(1, Math.max(0, 0.5 + gauss(r) * 0.22));
-      p = Math.max(pMin, Math.min(pMax, Math.round(p * 2) / 2 - 0.01));
+      var p = price(r);
       var at = d0 + pickHour(r) * 3600000 + Math.floor(r() * 3600000);
-      orders.push({ at: at, gross: p, net: Math.max(0, p * (1 - auto.fee / 100) - 0.30) }); // final value fee + 30p per order
+      var ad = r() < PROMOTED ? p * (AD_LO + r() * (AD_HI - AD_LO)) : 0;
+      var net = Math.max(0, p - p * FVF - PER_ORDER - ad);
+      // feedback, if any, lands a few days after the sale once the item has arrived
+      var fbAt = 0, fb = 0;
+      if (r() < FEEDBACK_RATE) {
+        fbAt = at + (2 + Math.floor(r() * 12)) * DAY + Math.floor(r() * DAY);
+        var y = r(); fb = y < FB_NEG ? -1 : y < FB_NEG + FB_NEU ? 0 : 1;
+      }
+      orders.push({ at: at, gross: p, net: net, fbAt: fbAt, fb: fb });
     }
     orders.sort(function (a, b) { return a.at - b.at; });
-    // listings: a handful of ±1 changes spread through the day, netting at most ±5
-    var walk = Math.max(-5, Math.min(5, Math.round(gauss(r) * 2.2)));
+    // listings: a handful of ±1 changes spread through the day, netting at most ±12
+    var walk = Math.max(-12, Math.min(12, Math.round(gauss(r) * 5)));
     var events = [];
-    var k = Math.abs(walk) + Math.floor(r() * 3); // a few extra up/down pairs that cancel out
+    var k = Math.abs(walk) + Math.floor(r() * 4); // a few extra up/down pairs that cancel out
     for (var j = 0; j < k; j++) events.push({ at: d0 + 7 * 3600000 + Math.floor(r() * 16 * 3600000), dv: 0 });
     for (var m = 0; m < events.length; m++) events[m].dv = m < Math.abs(walk) ? (walk > 0 ? 1 : -1) : (m % 2 ? 1 : -1);
     events.sort(function (a, b) { return a.at - b.at; });
@@ -554,95 +490,47 @@
   }
 
   // Figures as they stand at instant `now`.
-  function computeAuto(now) {
-    var from = auto.anchorAt;
-    var lMin = Math.min(auto.lMin, auto.lMax), lMax = Math.max(auto.lMin, auto.lMax);
-    var ytd = +auto.base.ytd || 0, active = +auto.base.active || 0, offset = 0;
-    var y = new Date(now).getFullYear();
-    if (new Date(from).getFullYear() < y) { ytd = 0; from = Math.max(from, new Date(y, 0, 1).getTime()); }
+  function compute(now) {
+    var jan1 = new Date(new Date(now).getFullYear(), 0, 1).getTime();
+    var from = Math.min(jan1, now - 60 * DAY);          // enough history for listings and the feedback window
+    var active = Math.round((LIST_LO + LIST_HI) / 2), offset = 0, ytd = 0;
+    var fbPos = 0, fbNeu = 0, fbNeg = 0, fbLo = now - 30 * DAY;
+    var fundsLo = now - 4 * DAY, fundsHi = now - 3 * DAY, funds = 0;
     for (var dn = dayNum(from); dn <= dayNum(now); dn++) {
-      var day = simDay(dn * DAY + DAY / 2);
-      day.orders.forEach(function (o) { if (o.at > from && o.at <= now) ytd += o.gross; });
-      day.events.forEach(function (e) { if (e.at > from && e.at <= now) active = Math.max(lMin, Math.min(lMax, active + e.dv)); });
-      day.shocks.forEach(function (e) { if (e.at > from && e.at <= now) offset += e.dv; });
+      var day = simDay(dn);
+      day.orders.forEach(function (o) {
+        if (o.at >= jan1 && o.at <= now) ytd += o.gross;
+        // funds released over the last 24 hours: sales from 3 days ago, net of fees and ad fees
+        if (o.at > fundsLo && o.at <= fundsHi) funds += o.net;
+        if (o.fbAt && o.fbAt > fbLo && o.fbAt <= now) { if (o.fb > 0) fbPos++; else if (o.fb < 0) fbNeg++; else fbNeu++; }
+      });
+      day.events.forEach(function (e) { if (e.at <= now) active = Math.max(LIST_LO, Math.min(LIST_HI, active + e.dv)); });
+      day.shocks.forEach(function (e) { if (e.at <= now) offset += e.dv; });
     }
-    var today = simDay(now).orders.filter(function (o) { return o.at <= now; }).length;
-    // funds released over the last 24 hours: sales from 3 days ago, net of fees
-    var lo = now - 4 * DAY, hi = now - 3 * DAY, funds = 0;
-    for (var d = dayNum(lo); d <= dayNum(hi); d++) {
-      simDay(d * DAY + DAY / 2).orders.forEach(function (o) { if (o.at > lo && o.at <= hi) funds += o.net; });
-    }
-    return { ytd: fmtMoney(ytd), active: String(Math.max(0, active + offset)), orders: String(today), buyerPaid: String(today), funds: fmtMoney(funds) };
+    var today = simDay(dayNum(now)).orders.filter(function (o) { return o.at <= now; }).length;
+    return { ytd: fmtMoney(ytd), active: fmtInt(Math.max(0, active + offset)), orders: fmtInt(today), buyerPaid: fmtInt(today),
+      funds: fmtMoney(funds), fbPos: fmtInt(fbPos), fbNeu: fmtInt(fbNeu), fbNeg: fmtInt(fbNeg) };
   }
+  function fmtInt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
   function fmtMoney(n) {
     n = Math.round(n * 100) / 100;
     var s = n.toFixed(2).replace(/\.00$/, '');
     return s.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
 
-  function applyAuto() {
-    if (!auto.on || !auto.anchorAt || !auto.base) return;
-    Object.assign(values, computeAuto(Date.now()));
-  }
-
   // ---------- rendering ----------
+  var slots = document.querySelectorAll('[data-key]');
   function render() {
-    eds.forEach(function (el) { el.textContent = values[el.dataset.key]; });
-    document.querySelector('#fbPosIcon circle').setAttribute('fill', parseFloat(values.fbPos) > 0 ? '#3a8a3e' : '#191919');
-    document.querySelector('#fbNegIcon circle').setAttribute('fill', parseFloat(values.fbNeg) > 0 ? '#c32c20' : '#191919');
+    var v = compute(Date.now());
+    slots.forEach(function (el) { el.textContent = v[el.dataset.key]; });
+    document.querySelector('#fbPosIcon circle').setAttribute('fill', +v.fbPos.replace(/,/g, '') > 0 ? '#3a8a3e' : '#191919');
+    document.querySelector('#fbNegIcon circle').setAttribute('fill', +v.fbNeg.replace(/,/g, '') > 0 ? '#c32c20' : '#191919');
   }
-  function syncAutoUI() {
-    autoBox.classList.toggle('on', sheet.elements.autoOn.checked);
-    var m = +sheet.elements.monthly.value || 0, pMin = +sheet.elements.pMin.value || 0, pMax = +sheet.elements.pMax.value || 0;
-    var avg = (pMin + pMax) / 2;
-    document.getElementById('autoNote').textContent = avg > 0
-      ? 'About ' + Math.round(m / 30.4 / avg) + ' orders and £' + fmtMoney(m / 30.4) + ' a day on a normal day, arriving around the clock, with good and bad weeks, slumps, surges, stock-outs and restocks on top. Year-to-date and active start from the values above; orders and funds are simulated.' + (auto.on ? ' ' + regimeText(Date.now()) : '')
-      : '';
-  }
-  function open() {
-    Object.keys(values).forEach(function (k) { if (sheet.elements[k]) sheet.elements[k].value = String(values[k]).replace(/,/g, ''); });
-    sheet.elements.autoOn.checked = !!auto.on;
-    ['monthly', 'pMin', 'pMax', 'lMin', 'lMax', 'fee'].forEach(function (k) { sheet.elements[k].value = auto[k]; });
-    syncAutoUI();
-    screen.classList.add('open');
-  }
-  function close() { screen.classList.remove('open'); }
-
-  document.getElementById('cart').addEventListener('click', open);
-  document.getElementById('sheetBg').addEventListener('click', close);
-  document.getElementById('cancel').addEventListener('click', close);
-  sheet.addEventListener('input', syncAutoUI);
-  sheet.addEventListener('submit', function (ev) {
-    ev.preventDefault();
-    Object.keys(values).forEach(function (k) {
-      var v = sheet.elements[k].value.trim();
-      values[k] = v === '' ? '0' : v;
-    });
-    auto.on = sheet.elements.autoOn.checked;
-    ['monthly', 'pMin', 'pMax', 'lMin', 'lMax', 'fee'].forEach(function (k) {
-      var v = parseFloat(sheet.elements[k].value); auto[k] = isNaN(v) ? AUTO_DEFAULTS[k] : v;
-    });
-    if (auto.on) {
-      // year-to-date and listings continue from the values just typed; everything else is simulated from now
-      auto.anchorAt = Date.now();
-      auto.base = { ytd: parseFloat(String(values.ytd).replace(/,/g, '')) || 0, active: +values.active || 0 };
-      if (!auto.seed || auto.seed === 1) auto.seed = (Math.random() * 1e9) >>> 0;
-      dayCache = {}; blockCache = {};
-    }
-    try { localStorage.setItem(KEY, JSON.stringify(values)); } catch (e) {}
-    try { localStorage.setItem(AKEY, JSON.stringify(auto)); } catch (e) {}
-    applyAuto();
-    render();
-    close();
-  });
-
-  applyAuto();
   render();
-  if (location.hash === '#open') open();
 
   // keep the figures live while the page is open
-  setInterval(function () { applyAuto(); render(); }, 15000);
-  document.addEventListener('visibilitychange', function () { if (!document.hidden) { applyAuto(); render(); } });
+  setInterval(render, 15000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) render(); });
 
   // ?scroll=N for screenshots / testing
   var m = location.search.match(/scroll=(\d+)/);
