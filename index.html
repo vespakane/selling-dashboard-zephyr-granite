@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Selling</title>
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="assets/icon.svg">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="eBay">
+<meta name="theme-color" content="#ffffff">
 <style>
   @font-face { font-family: "UI Sans"; font-weight: 400; font-style: normal; font-display: block;
     src: url("assets/fonts/ui-regular.woff2") format("woff2"); }
@@ -216,7 +220,7 @@
       <h2>Tasks<span class="dot">·</span>2</h2>
       <div class="tasks">
         <button class="task"><span class="t">Buyer paid - send now</span><span class="n badge"><span data-key="buyerPaid"></span></span></button>
-        <button class="task"><span class="t">Send offer to buyers</span><span class="n">1</span></button>
+        <button class="task"><span class="t">Send offer to buyers</span><span class="n"><span data-key="offers"></span></span></button>
       </div>
     </section>
 
@@ -508,9 +512,13 @@
       day.shocks.forEach(function (e) { if (e.at <= now) offset += e.dv; });
     }
     var today = simDay(dayNum(now)).orders.filter(function (o) { return o.at <= now; }).length;
-    return { ytd: fmtMoney(ytd), active: fmtInt(Math.max(0, active + offset)), orders: fmtInt(today), buyerPaid: fmtInt(today),
+    // listings with interested buyers you can send an offer to: a few percent of active, drifting day to day
+    var dk = dayNum(now), f = (now - startOfDay(now)) / DAY;
+    var offers = Math.max(1, Math.round((active + offset) * (offerShare(dk) * (1 - f) + offerShare(dk + 1) * f)));
+    return { ytd: fmtMoney(ytd), active: fmtInt(Math.max(0, active + offset)), orders: fmtInt(today), buyerPaid: fmtInt(today), offers: fmtInt(offers),
       funds: fmtMoney(funds), fbPos: fmtInt(fbPos), fbNeu: fmtInt(fbNeu), fbNeg: fmtInt(fbNeg) };
   }
+  function offerShare(dayKey) { var r = rng((SEED * 1181783497 + dayKey * 2654435761 + 5) >>> 0); return 0.03 + r() * 0.05; }
   function fmtInt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
   function fmtMoney(n) {
     n = Math.round(n * 100) / 100;
