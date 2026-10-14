@@ -236,7 +236,6 @@
   .o-img { position: relative; flex: none; width: 120px; height: 120px; }
   .o-pic { width: 100%; height: 100%; border-radius: 24px; background: var(--surface-2); overflow: hidden; }
   .o-pic img { width: 100%; height: 100%; object-fit: contain; }
-  .o-img .fd { position: absolute; left: 4.33px; top: 3.33px; width: 44px; height: 14px; }
   .o-img .ex { position: absolute; top: 9px; right: 9px; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.6); display: grid; place-items: center; }
   .o-img .ex svg { width: 14px; height: 14px; }
   .o-body { flex: 1; min-width: 0; margin-left: 16px; }
@@ -451,7 +450,7 @@
   <div class="sheet" id="sheet">
     <div class="grab"></div>
     <div class="sheet-head"><h2>Listings</h2><button class="close" id="sheetClose" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#191919" stroke-width="2" stroke-linecap="round"><path d="M1 1l10 10M11 1 1 11"/></svg></button></div>
-    <p class="hint">Today's open orders are dealt out across these listings. "Orders" is how many of them each listing gets; anything left over is shared in the same proportions.</p>
+    <p class="hint">Today's open orders are dealt out across these listings. "Orders" is how many of them each listing gets; only that many are shown.</p>
     <div id="lrows"></div>
     <h3>Add a listing</h3>
     <div class="field"><label>Photo</label><label class="photo" id="photoBox"><span id="photoHint">Add photo</span><img id="photoPrev" alt="" hidden><input type="file" accept="image/*" id="photoIn"></label></div>
@@ -725,20 +724,13 @@
     return s;
   }
 
-  // Which listing each open order is for: exactly the counts set in the sheet, in a shuffled order,
-  // then anything beyond that in the same proportions.
-  function dealOrders(n, dayKey) {
-    var r = rng((SEED * 1664525 + dayKey * 1013904223 + 13) >>> 0), deck = [], total = 0;
-    listings.forEach(function (l, i) { var c = Math.max(1, l.count | 0); total += c; for (var k = 0; k < c; k++) deck.push(i); });
+  // Which listing each shown order is for: exactly the counts set in the sheet, in a shuffled order.
+  // Only that many of today's orders are shown; the rest are left off the list.
+  function dealOrders(dayKey) {
+    var r = rng((SEED * 1664525 + dayKey * 1013904223 + 13) >>> 0), deck = [];
+    listings.forEach(function (l, i) { var c = Math.max(1, l.count | 0); for (var k = 0; k < c; k++) deck.push(i); });
     for (var i = deck.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), t = deck[i]; deck[i] = deck[j]; deck[j] = t; }
-    var out = [];
-    for (var q = 0; q < n; q++) {
-      if (q < deck.length) { out.push(deck[q]); continue; }
-      var x = r() * total, k = 0;
-      for (; k < listings.length - 1; k++) { x -= Math.max(1, listings[k].count | 0); if (x < 0) break; }
-      out.push(k);
-    }
-    return out;
+    return deck;
   }
 
   // Photos are kept as data URLs; each card points at one blob URL per listing instead of repeating the data
@@ -757,7 +749,6 @@
     return u;
   }
 
-  var FD_SVG = '<svg class="fd" viewBox="0 0 44 14"><rect width="13.33" height="13.33" rx="1.5" fill="#e3322b"/><circle cx="6.67" cy="3.7" r="1.2" fill="#fff"/><rect x="2.2" y="6.3" width="8.9" height="3.2" fill="#fff"/><rect x="4.5" y="10.4" width="4.3" height="1.5" fill="#fff"/><path d="M21.3 1.9h11M23 3.2h9.3M24.7 4.5h7.6" stroke="#e3322b" stroke-width=".55" opacity=".85"/><text x="32.7" y="5.8" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-style="italic" font-size="5.4" fill="#e3322b" textLength="8.3" lengthAdjust="spacingAndGlyphs">FAST</text><text x="19.4" y="11.4" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-style="italic" font-size="6.7" fill="#f2a73b" textLength="19.4" lengthAdjust="spacingAndGlyphs">DELIVERY</text></svg>';
   var EX_SVG = '<span class="ex"><svg viewBox="0 0 14 14" fill="none" stroke="#191919" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.3 1.3H12.7V5.7M12.7 1.3 8 6M5.7 12.7H1.3V8.3M1.3 12.7 6 8"/></svg></span>';
   var VAN_SVG = '<span class="o-van"><svg viewBox="0 0 16 13" fill="none" stroke="#191919" stroke-width="1.9" stroke-linejoin="round"><path d="M1.2 1.4h8.3v8.4H1.2z"/><path d="M9.5 4h2.9l2.4 2.6v3.2H9.5"/><circle cx="4.2" cy="11" r="1.4" fill="#191919" stroke="none"/><circle cx="12" cy="11" r="1.4" fill="#191919" stroke="none"/></svg></span>';
   var ALERT_SVG = '<svg class="al" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#c32c20"/><path d="M8 4v4.6" stroke="#fff" stroke-width="2" stroke-linecap="round"/><circle cx="8" cy="11.6" r="1.1" fill="#fff"/></svg>';
@@ -777,7 +768,7 @@
     var promoted = !!l.promoted && o.ad > 0;
     if (fx) { qty = fx.qty || 1; colour = fx.colour || ''; buyer = fx.buyer; promoted = !!fx.promoted; paid = sold = today; }
     var h = '<div class="o-due">' + ALERT_SVG + 'Post by ' + dPost(paid + DAY) + CHEV_SVG + '</div>';
-    h += '<div class="o-card"><div class="o-row"><div class="o-img"><div class="o-pic">' + (l.img ? '<img src="' + esc(imgURL(l)) + '" alt="">' : '') + '</div>' + FD_SVG + EX_SVG + '</div><div class="o-body">';
+    h += '<div class="o-card"><div class="o-row"><div class="o-img"><div class="o-pic">' + (l.img ? '<img src="' + esc(imgURL(l)) + '" alt="">' : '') + '</div>' + EX_SVG + '</div><div class="o-body">';
     h += '<div class="o-status">Buyer paid' + VAN_SVG + '</div>';
     h += '<div class="o-title">' + esc(l.title) + '</div>';
     if (colour) h += '<div class="o-meta">Colour: ' + esc(colour) + '</div>';
@@ -795,15 +786,15 @@
     if (!force && sig === lastSig) return;
     lastSig = sig;
     if (!listings.length) {
-      olist.innerHTML = '<p class="o-empty"><b>No listings yet</b>Tap Actions and add the listings you sell. Today\'s ' + v.buyerPaid + ' open orders will be spread across them.</p>';
+      olist.innerHTML = '<p class="o-empty"><b>No listings yet</b>Tap Actions and add the listings you sell. Today\'s open orders will be spread across them.</p>';
       return;
     }
     var orders = v.todayOrders.slice().sort(function (a, b) { return b.at - a.at; }), h = '';
     if (window.FIXTURE && FIXTURE.orders) {
       FIXTURE.orders.forEach(function (fx, i) { h += orderCard({ at: now - i * 60000, ad: 1 }, listings[fx.listing], now, fx); });
     } else {
-      var deal = dealOrders(orders.length, dayNum(now));
-      orders.forEach(function (o, i) { h += orderCard(o, listings[deal[i]], now); });
+      var deal = dealOrders(dayNum(now));
+      orders.slice(0, deal.length).forEach(function (o, i) { h += orderCard(o, listings[deal[i]], now); });
     }
     olist.innerHTML = h;
   }
