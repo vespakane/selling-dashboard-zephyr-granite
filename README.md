@@ -7,7 +7,7 @@ The figures are not typed in; the page simulates a long-running low-ticket shop 
 What the simulation does:
 
 - **Revenue** drifts month to month between about £30k and £75k, with good and bad weeks on top. Most items sell for £5 to £15 at .49/.99 price points; about one order in fourteen is dearer (£15 to £40) and one in a hundred is £40 to £150.
-- **Orders** get individual timestamps on a daily curve (quiet overnight, evening peak, weekends a little busier). The buyer-paid badge is today's orders so far and resets at midnight. The year-to-date total and the orders count are the sum and number of sales since 1 January; the account has traded since before this year.
+- **Orders** get individual timestamps on a daily curve (quiet overnight, evening peak, weekends a little busier). The buyer-paid badge is today's orders so far and resets at midnight. The year-to-date total and the orders count are the sum and number of sales since 1 January (over £100 the total is shown in whole pounds, rounded down); the account has traded since before this year.
 - **Funds** are the sales from three days earlier, released over the last 24 hours, minus the final value fee (12.8% plus 30p an order) and ad fees (about 45% of orders come through promoted listings at a 4 to 10% ad rate). Postage is bought off eBay, so nothing is deducted for it.
 - **Feedback (last 30 days)** comes from about 24% of buyers, two to fourteen days after the sale; roughly 1% of it is negative and 0.7% neutral.
 - **Send offer to buyers** is the number of listings with interested buyers, 3 to 8 percent of active listings, drifting day to day and moving with the listing count.
