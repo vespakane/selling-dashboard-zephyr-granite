@@ -14,6 +14,6 @@ What the simulation does:
 - **Active listings** stay within a band of about 1,200 to 1,800, changing by one at random moments through the day. **Inactive** listings are 2 to 6 percent of active, plus anything a stock-out has taken offline. The tiles abbreviate thousands, so 1,209 shows as 1.2k+.
 - **Shocks**: roughly every month or two there is a demand slump (sales down 25 to 55 percent for 3 to 10 days) or a surge (up 30 to 90 percent for 2 to 6 days), a stock-out (listings fall by 120 to 400 over a few days, sales fall with them, then both recover as stock is relisted) or a restock (a batch of 100 to 300 new listings that lifts sales and sells through over a few weeks), plus the odd dead day and rare viral spike. Supply shocks can push the listing count outside its usual band for a while.
 
-The device's own status bar sits above the page; the page leaves room for it on notched phones. Added to an iPhone home screen it opens full-screen as "eBay" with the icon in `assets/apple-touch-icon.png`.
+The device's own status bar sits above the page as an opaque bar, so nothing scrolls under it. Added to an iPhone home screen it opens full-screen as "eBay" with the icon in `assets/apple-touch-icon.png`.
 
 `tools/` holds the headless-Chrome render and measurement scripts used to line the layout up against reference captures (the captures themselves are not included).
