@@ -212,6 +212,21 @@
   .fb3 .field { flex: 1; }
   .sheet .save { margin-top: 10px; width: 100%; height: 48px; border-radius: 24px; background: var(--blue); color: #fff; font-size: 16px; font-weight: 700; }
   .sheet .cancel { margin-top: 8px; width: 100%; height: 44px; font-size: 16px; color: var(--ink); }
+  .auto { margin: 4px 0 14px; padding: 14px; border-radius: 12px; background: var(--surface-blue); }
+  .auto .sw { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .auto .sw b { font-size: 16px; }
+  .auto .sw small { display: block; font-size: 12px; color: var(--ink-2); margin-top: 3px; }
+  .auto .sw input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .auto .knob { flex: none; width: 48px; height: 28px; border-radius: 14px; background: #c9c9c9; position: relative; transition: background .2s; }
+  .auto .knob::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  .auto .sw input:checked + .knob { background: var(--green); }
+  .auto .sw input:checked + .knob::after { transform: translateX(20px); }
+  .auto .opts { display: none; margin-top: 14px; }
+  .auto.on .opts { display: block; }
+  .auto .two { display: flex; gap: 8px; }
+  .auto .two .field { flex: 1; }
+  .auto .opts .field:last-child { margin-bottom: 0; }
+  .auto .note { font-size: 12px; line-height: 16px; color: var(--ink-2); margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -371,6 +386,22 @@
     <label class="field"><span>ORDERS</span><input name="orders" inputmode="numeric"></label>
     <label class="field"><span>BUYER PAID - SEND NOW</span><input name="buyerPaid" inputmode="numeric"></label>
     <label class="field"><span>YOUR TOTAL FUNDS</span><div class="pre"><input name="funds" inputmode="decimal"></div></label>
+    <div class="auto" id="auto">
+      <label class="sw"><span><b>Automate daily</b><small>Simulates sales, orders, listings and funds each day</small></span><input type="checkbox" name="autoOn"><span class="knob"></span></label>
+      <div class="opts">
+        <label class="field"><span>MONTHLY SALES TARGET</span><div class="pre"><input name="monthly" inputmode="numeric"></div></label>
+        <div class="two">
+          <label class="field"><span>MIN PRICE</span><div class="pre"><input name="pMin" inputmode="decimal"></div></label>
+          <label class="field"><span>MAX PRICE</span><div class="pre"><input name="pMax" inputmode="decimal"></div></label>
+        </div>
+        <div class="two">
+          <label class="field"><span>USUAL LISTINGS MIN</span><input name="lMin" inputmode="numeric"></label>
+          <label class="field"><span>USUAL LISTINGS MAX</span><input name="lMax" inputmode="numeric"></label>
+        </div>
+        <label class="field"><span>FEES % (FUNDS = SALES 3 DAYS AGO MINUS FEES)</span><input name="fee" inputmode="decimal"></label>
+        <div class="note" id="autoNote"></div>
+      </div>
+    </div>
     <div class="fb3">
       <label class="field"><span>FEEDBACK +</span><input name="fbPos" inputmode="numeric"></label>
       <label class="field"><span>FEEDBACK ●</span><input name="fbNeu" inputmode="numeric"></label>
@@ -384,20 +415,195 @@
 <script>
 (function () {
   var KEY = 'selling-dashboard-values';
+  var AKEY = 'selling-dashboard-auto';
   var screen = document.querySelector('.screen');
   var sheet = document.getElementById('sheet');
+  var autoBox = document.getElementById('auto');
   var eds = document.querySelectorAll('.ed');
   var values = {};
   eds.forEach(function (el) { values[el.dataset.key] = el.textContent; });
   try { Object.assign(values, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
 
+  // ---------- automation ----------
+  // `auto` holds the settings plus an anchor: the moment automation was saved and the year-to-date
+  // and listing figures at that moment. Every day's orders are generated deterministically from the
+  // seed with individual timestamps, so the dashboard can be read at any instant (or after days
+  // away) and shows the same figures for that instant. Nothing runs in the background.
+  var AUTO_DEFAULTS = { on: false, monthly: 60000, pMin: 5, pMax: 15, lMin: 500, lMax: 800, fee: 12.8, seed: 1 };
+  var auto = Object.assign({}, AUTO_DEFAULTS);
+  try { Object.assign(auto, JSON.parse(localStorage.getItem(AKEY) || '{}')); } catch (e) {}
+
+  var DAY = 86400000;
+  function startOfDay(t) { var d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); }
+  function dayNum(t) { return Math.round(startOfDay(t) / DAY); }
+
+  // mulberry32: small seeded PRNG so each (seed, day) gives a stable stream of numbers
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function gauss(r) { var u = 1 - r(), v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+  var DOW = [1.12, 0.95, 0.92, 0.94, 0.96, 1.00, 1.11]; // Sun..Sat — weekends run a little hotter
+  // relative order volume by hour of day: quiet overnight, building through the afternoon, evening peak
+  var HOUR = [0.45, 0.25, 0.15, 0.10, 0.10, 0.15, 0.30, 0.60, 0.90, 1.10, 1.20, 1.20, 1.20, 1.20, 1.20, 1.20, 1.30, 1.40, 1.50, 1.70, 1.90, 1.90, 1.50, 0.85];
+  var HOUR_SUM = HOUR.reduce(function (a, b) { return a + b; }, 0);
+  function pickHour(r) {
+    var x = r() * HOUR_SUM;
+    for (var h = 0; h < 24; h++) { x -= HOUR[h]; if (x <= 0) return h; }
+    return 23;
+  }
+
+  // ---- regimes and shocks ----
+  // Slow demand drift: one factor per week, interpolated day to day, so sales have good and bad weeks.
+  function weekFactor(w) { return Math.exp(gauss(rng((auto.seed * 2246822519 + w * 3266489917 + 11) >>> 0)) * 0.11); }
+  function drift(dayKey) {
+    var w = Math.floor(dayKey / 7), f = (dayKey - w * 7) / 7;
+    return weekFactor(w) * (1 - f) + weekFactor(w + 1) * f;
+  }
+  // Discrete shocks, drawn per 30-day block. Each day of a shock carries a demand multiplier and a
+  // change to the listing count. Supply shocks always unwind, so listings return to their usual band.
+  var blockCache = {};
+  function shockBlock(b) {
+    if (blockCache[b]) return blockCache[b];
+    var r = rng((auto.seed * 3812015801 + b * 2654435761 + 7) >>> 0);
+    var days = {};
+    function put(day, mult, delta, label) {
+      var e = days[day] || (days[day] = { demand: 1, delta: 0, labels: [] });
+      e.demand *= mult; e.delta += delta; if (e.labels.indexOf(label) < 0) e.labels.push(label);
+    }
+    var base = b * 30;
+    if (r() < 0.65) { // demand side
+      var st = base + Math.floor(r() * 30);
+      if (r() < 0.5) { var dur = 3 + Math.floor(r() * 8), m = 0.45 + r() * 0.3;
+        for (var i = 0; i < dur; i++) put(st + i, m, 0, 'demand slump');
+      } else { var dur2 = 2 + Math.floor(r() * 5), m2 = 1.3 + r() * 0.6;
+        for (var j = 0; j < dur2; j++) put(st + j, m2, 0, 'demand surge');
+      }
+    }
+    if (r() < 0.5) { // supply side
+      var st2 = base + Math.floor(r() * 30);
+      if (r() < 0.6) { // stock-out: listings fall, sit low, then come back as stock is relisted
+        var size = 60 + Math.floor(r() * 140), dDays = 2 + Math.floor(r() * 3), hold = 1 + Math.floor(r() * 4), rDays = 6 + Math.floor(r() * 9);
+        var m3 = 0.5 + r() * 0.25, d = st2;
+        for (var a = 0; a < dDays; a++, d++) put(d, 1 + (m3 - 1) * ((a + 1) / dDays), -Math.round(size / dDays), 'stock-out');
+        for (var h = 0; h < hold; h++, d++) put(d, m3, 0, 'stock-out');
+        for (var c = 0; c < rDays; c++, d++) put(d, m3 + (1 - m3) * ((c + 1) / rDays), Math.round(size / rDays), 'restocking');
+      } else { // restock: a batch of new listings that sells through over the following weeks
+        var size2 = 50 + Math.floor(r() * 100), up = 1 + Math.floor(r() * 3), sell = 14 + Math.floor(r() * 10), m4 = 1.1 + r() * 0.2, d2 = st2;
+        for (var u = 0; u < up; u++, d2++) put(d2, m4, Math.round(size2 / up), 'new stock');
+        for (var v = 0; v < sell; v++, d2++) put(d2, m4 - (m4 - 1) * ((v + 1) / sell), -Math.round(size2 / sell), 'selling through');
+      }
+    }
+    if (r() < 0.08) put(base + Math.floor(r() * 30), 0.1 + r() * 0.2, 0, 'outage'); // a dead day
+    if (r() < 0.06) { var vs = base + Math.floor(r() * 30), vd = 1 + Math.floor(r() * 2), vm = 2.2 + r() * 0.8; // something went viral
+      for (var k = 0; k < vd; k++) put(vs + k, vm, 0, 'viral spike');
+    }
+    return (blockCache[b] = days);
+  }
+  function shockFor(dayKey) {
+    var b = Math.floor(dayKey / 30), out = { demand: 1, delta: 0, labels: [] };
+    [b - 1, b].forEach(function (bb) {
+      var e = shockBlock(bb)[dayKey]; if (!e) return;
+      out.demand *= e.demand; out.delta += e.delta; out.labels = out.labels.concat(e.labels);
+    });
+    return out;
+  }
+  function regimeText(t) {
+    var key = dayNum(t), sh = shockFor(key), m = drift(key) * sh.demand;
+    var what = sh.labels.length ? sh.labels.join(', ') : (m > 1.08 ? 'strong week' : m < 0.92 ? 'soft week' : 'normal trading');
+    return 'Today: demand ' + m.toFixed(2) + '× (' + what + ')' + (sh.delta ? ', listings ' + (sh.delta > 0 ? '+' : '') + sh.delta : '') + '.';
+  }
+
+  // One simulated day: a time-sorted list of orders plus the moments the listing count changes.
+  var dayCache = {};
+  function simDay(t) {
+    var d0 = startOfDay(t), key = dayNum(t);
+    if (dayCache[key]) return dayCache[key];
+    var r = rng((auto.seed * 2654435761 + key * 40503) >>> 0);
+    var pMin = Math.min(auto.pMin, auto.pMax), pMax = Math.max(auto.pMin, auto.pMax);
+    var avgTicket = (pMin + pMax) / 2;
+    var baseOrders = (auto.monthly / 30.4) / avgTicket;
+    var sh = shockFor(key);
+    var n = Math.max(0, Math.round(baseOrders * DOW[new Date(d0).getDay()] * drift(key) * sh.demand * Math.exp(gauss(r) * 0.14)));
+    var orders = [];
+    for (var i = 0; i < n; i++) {
+      // most items cluster around the middle of the range, in 0.49/0.99 style price points
+      var p = pMin + (pMax - pMin) * Math.min(1, Math.max(0, 0.5 + gauss(r) * 0.22));
+      p = Math.max(pMin, Math.min(pMax, Math.round(p * 2) / 2 - 0.01));
+      var at = d0 + pickHour(r) * 3600000 + Math.floor(r() * 3600000);
+      orders.push({ at: at, gross: p, net: Math.max(0, p * (1 - auto.fee / 100) - 0.30) }); // final value fee + 30p per order
+    }
+    orders.sort(function (a, b) { return a.at - b.at; });
+    // listings: a handful of ±1 changes spread through the day, netting at most ±5
+    var walk = Math.max(-5, Math.min(5, Math.round(gauss(r) * 2.2)));
+    var events = [];
+    var k = Math.abs(walk) + Math.floor(r() * 3); // a few extra up/down pairs that cancel out
+    for (var j = 0; j < k; j++) events.push({ at: d0 + 7 * 3600000 + Math.floor(r() * 16 * 3600000), dv: 0 });
+    for (var m = 0; m < events.length; m++) events[m].dv = m < Math.abs(walk) ? (walk > 0 ? 1 : -1) : (m % 2 ? 1 : -1);
+    events.sort(function (a, b) { return a.at - b.at; });
+    // supply shocks: larger listing moves spread through working hours
+    var shocks = [], sgn = sh.delta > 0 ? 1 : -1;
+    for (var q = 0; q < Math.abs(sh.delta); q++) shocks.push({ at: d0 + 8 * 3600000 + Math.floor(r() * 12 * 3600000), dv: sgn });
+    shocks.sort(function (a, b) { return a.at - b.at; });
+    return (dayCache[key] = { orders: orders, events: events, shocks: shocks });
+  }
+
+  // Figures as they stand at instant `now`.
+  function computeAuto(now) {
+    var from = auto.anchorAt;
+    var lMin = Math.min(auto.lMin, auto.lMax), lMax = Math.max(auto.lMin, auto.lMax);
+    var ytd = +auto.base.ytd || 0, active = +auto.base.active || 0, offset = 0;
+    var y = new Date(now).getFullYear();
+    if (new Date(from).getFullYear() < y) { ytd = 0; from = Math.max(from, new Date(y, 0, 1).getTime()); }
+    for (var dn = dayNum(from); dn <= dayNum(now); dn++) {
+      var day = simDay(dn * DAY + DAY / 2);
+      day.orders.forEach(function (o) { if (o.at > from && o.at <= now) ytd += o.gross; });
+      day.events.forEach(function (e) { if (e.at > from && e.at <= now) active = Math.max(lMin, Math.min(lMax, active + e.dv)); });
+      day.shocks.forEach(function (e) { if (e.at > from && e.at <= now) offset += e.dv; });
+    }
+    var today = simDay(now).orders.filter(function (o) { return o.at <= now; }).length;
+    // funds released over the last 24 hours: sales from 3 days ago, net of fees
+    var lo = now - 4 * DAY, hi = now - 3 * DAY, funds = 0;
+    for (var d = dayNum(lo); d <= dayNum(hi); d++) {
+      simDay(d * DAY + DAY / 2).orders.forEach(function (o) { if (o.at > lo && o.at <= hi) funds += o.net; });
+    }
+    return { ytd: fmtMoney(ytd), active: String(Math.max(0, active + offset)), orders: String(today), buyerPaid: String(today), funds: fmtMoney(funds) };
+  }
+  function fmtMoney(n) {
+    n = Math.round(n * 100) / 100;
+    var s = n.toFixed(2).replace(/\.00$/, '');
+    return s.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  function applyAuto() {
+    if (!auto.on || !auto.anchorAt || !auto.base) return;
+    Object.assign(values, computeAuto(Date.now()));
+  }
+
+  // ---------- rendering ----------
   function render() {
     eds.forEach(function (el) { el.textContent = values[el.dataset.key]; });
     document.querySelector('#fbPosIcon circle').setAttribute('fill', parseFloat(values.fbPos) > 0 ? '#3a8a3e' : '#191919');
     document.querySelector('#fbNegIcon circle').setAttribute('fill', parseFloat(values.fbNeg) > 0 ? '#c32c20' : '#191919');
   }
+  function syncAutoUI() {
+    autoBox.classList.toggle('on', sheet.elements.autoOn.checked);
+    var m = +sheet.elements.monthly.value || 0, pMin = +sheet.elements.pMin.value || 0, pMax = +sheet.elements.pMax.value || 0;
+    var avg = (pMin + pMax) / 2;
+    document.getElementById('autoNote').textContent = avg > 0
+      ? 'About ' + Math.round(m / 30.4 / avg) + ' orders and £' + fmtMoney(m / 30.4) + ' a day on a normal day, arriving around the clock, with good and bad weeks, slumps, surges, stock-outs and restocks on top. Year-to-date and active start from the values above; orders and funds are simulated.' + (auto.on ? ' ' + regimeText(Date.now()) : '')
+      : '';
+  }
   function open() {
-    Object.keys(values).forEach(function (k) { if (sheet.elements[k]) sheet.elements[k].value = values[k]; });
+    Object.keys(values).forEach(function (k) { if (sheet.elements[k]) sheet.elements[k].value = String(values[k]).replace(/,/g, ''); });
+    sheet.elements.autoOn.checked = !!auto.on;
+    ['monthly', 'pMin', 'pMax', 'lMin', 'lMax', 'fee'].forEach(function (k) { sheet.elements[k].value = auto[k]; });
+    syncAutoUI();
     screen.classList.add('open');
   }
   function close() { screen.classList.remove('open'); }
@@ -405,18 +611,38 @@
   document.getElementById('cart').addEventListener('click', open);
   document.getElementById('sheetBg').addEventListener('click', close);
   document.getElementById('cancel').addEventListener('click', close);
+  sheet.addEventListener('input', syncAutoUI);
   sheet.addEventListener('submit', function (ev) {
     ev.preventDefault();
     Object.keys(values).forEach(function (k) {
       var v = sheet.elements[k].value.trim();
       values[k] = v === '' ? '0' : v;
     });
+    auto.on = sheet.elements.autoOn.checked;
+    ['monthly', 'pMin', 'pMax', 'lMin', 'lMax', 'fee'].forEach(function (k) {
+      var v = parseFloat(sheet.elements[k].value); auto[k] = isNaN(v) ? AUTO_DEFAULTS[k] : v;
+    });
+    if (auto.on) {
+      // year-to-date and listings continue from the values just typed; everything else is simulated from now
+      auto.anchorAt = Date.now();
+      auto.base = { ytd: parseFloat(String(values.ytd).replace(/,/g, '')) || 0, active: +values.active || 0 };
+      if (!auto.seed || auto.seed === 1) auto.seed = (Math.random() * 1e9) >>> 0;
+      dayCache = {}; blockCache = {};
+    }
     try { localStorage.setItem(KEY, JSON.stringify(values)); } catch (e) {}
+    try { localStorage.setItem(AKEY, JSON.stringify(auto)); } catch (e) {}
+    applyAuto();
     render();
     close();
   });
+
+  applyAuto();
   render();
   if (location.hash === '#open') open();
+
+  // keep the figures live while the page is open
+  setInterval(function () { applyAuto(); render(); }, 15000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { applyAuto(); render(); } });
 
   // ?scroll=N for screenshots / testing
   var m = location.search.match(/scroll=(\d+)/);
