@@ -73,7 +73,7 @@
   .cart {
     position: absolute; right: 16px; top: 2px; width: 46px; height: 46px; border-radius: 50%;
     background: #f8f8f9; display: grid; place-items: center;
-    box-shadow: 0 5px 6px rgba(0,0,0,.07);
+    box-shadow: 0 7px 5px -1.5px rgba(0,0,0,.07);
   }
 
   /* ---------- summary band ---------- */
@@ -193,9 +193,110 @@
   .tab .b { position: absolute; left: 50%; margin-left: 6px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--red); color: #fff;
     font-size: 9px; line-height: 16px; font-weight: 700; text-align: center; }
 
+  /* ---------- orders screen (a second scroller over the dashboard) ---------- */
+  #orders { visibility: hidden; }
+  .screen.orders #orders { visibility: visible; }
+  .screen.orders #scroll, .screen.orders .list-btn { visibility: hidden; }
+  .o-header { height: 57px; position: relative; }
+  .o-header h1 { position: absolute; left: 71.67px; top: 15px; font-size: 20px; line-height: 20px; font-weight: 700; letter-spacing: -.1px; }
+  .circ {
+    position: absolute; top: 2px; width: 46px; height: 46px; border-radius: 50%;
+    background: #f8f8f9; display: grid; place-items: center; box-shadow: 0 7px 5px -1.5px rgba(0,0,0,.07);
+  }
+  .o-back { left: 14.33px; } .o-back svg { width: 11px; height: 19px; margin-right: 1.67px; }
+  .o-more { right: 72px; } .o-more svg { width: 16px; height: 4px; margin-left: 2px; }
+  .o-cart { right: 16px; }
+  .o-tabs { display: flex; margin-top: 23px; padding: 0 16px 0 16.33px; overflow-x: auto; scrollbar-width: none; font-size: 14px; line-height: 14px; color: var(--ink-2); }
+  .o-tabs::-webkit-scrollbar { display: none; }
+  .o-tab { flex: none; padding: 0 .67px 7.5px; border-bottom: 2px solid transparent; white-space: nowrap; }
+  /* the app spaces its tabs a little unevenly; these gaps are the measured ones */
+  .o-tab:nth-child(2) { margin-left: 41px; } .o-tab:nth-child(3) { margin-left: 40.33px; } .o-tab:nth-child(4) { margin-left: 42.43px; } .o-tab:nth-child(n+5) { margin-left: 41.33px; }
+  .o-tab.sel { color: var(--ink); font-weight: 700; border-color: var(--ink); }
+  .o-pills { display: flex; align-items: center; margin-top: 8px; padding: 0 16px; height: 32px; }
+  .o-search { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; }
+  .o-search svg { width: 14px; height: 14px; }
+  .o-pill { height: 32px; border: 1px solid var(--line); border-radius: 16px; display: flex; align-items: center; font-size: 12px; line-height: 12px; white-space: nowrap; }
+  .o-actions { margin-left: 8px; padding: 0 15px 0 14.33px; gap: 8.67px; }
+  .o-actions svg { width: 9px; height: 5px; }
+  .o-refine { margin-left: auto; padding: 0 14.5px 0 15px; gap: 8px; }
+  .o-refine svg { width: 12px; height: 10px; }
+  .o-chips { display: flex; gap: 6.33px; margin-top: 15.33px; padding: 0 16px 0 15.33px; overflow-x: auto; scrollbar-width: none; }
+  .o-chips::-webkit-scrollbar { display: none; }
+  .o-chip { flex: none; height: 33.33px; border: 1px solid var(--line); border-radius: 17px; padding: 0 15.67px; font-size: 12px; line-height: 31.33px; white-space: nowrap; }
+  .o-chip.sel { border: 2px solid var(--ink); background: var(--surface-2); font-weight: 700; line-height: 29.33px; padding: 0 15px; }
+  .o-list { padding-bottom: 120px; }
+  .o-due {
+    margin: 39.33px 16px 0; height: 49px; border-radius: 11px; background: var(--surface-2); display: flex; align-items: center;
+    padding: 0 19px 0 16px; font-size: 14px; line-height: 14px; font-weight: 700;
+  }
+  .o-due .al { width: 16px; height: 16px; margin-right: 12px; }
+  .o-due .chev { margin-left: auto; margin-right: 0; }
+  .o-card + .o-due { margin-top: 32px; }
+  .o-row { display: flex; padding: 16px 16px 0; }
+  .o-img { position: relative; flex: none; width: 120px; height: 120px; }
+  .o-pic { width: 100%; height: 100%; border-radius: 24px; background: var(--surface-2); overflow: hidden; }
+  .o-pic img { width: 100%; height: 100%; object-fit: contain; }
+  .o-img .fd { position: absolute; left: 4.33px; top: 3.33px; width: 44px; height: 14px; }
+  .o-img .ex { position: absolute; top: 9px; right: 9px; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.6); display: grid; place-items: center; }
+  .o-img .ex svg { width: 14px; height: 14px; }
+  .o-body { flex: 1; min-width: 0; margin-left: 16px; }
+  .o-status { display: flex; align-items: center; height: 32px; font-size: 14px; line-height: 14px; font-weight: 700; }
+  .o-van { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-2); margin-left: 8px; display: grid; place-items: center; }
+  .o-van svg { width: 16.7px; height: 14.1px; }
+  .o-title { margin-top: 4.33px; font-size: 14px; line-height: 17px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .o-meta { margin-top: 3.67px; font-size: 12px; line-height: 14.33px; color: var(--ink-2); }
+  .o-meta + .o-meta { margin-top: 2px; }
+  .o-tag { display: block; width: fit-content; margin-top: 3.5px; height: 21px; line-height: 21px; padding: 0 4.5px; border-radius: 4px; background: #f4f4f4; font-size: 14px; }
+  .o-meta + .o-tag { margin-top: 3.67px; }
+  .o-price { margin-top: 5.83px; font-size: 16px; line-height: 16px; font-weight: 700; }
+  .o-price .sub { font-size: 12px; font-weight: 400; color: var(--ink-2); margin-left: -1.4px; }
+  .o-lines { margin-top: 0; font-size: 12px; line-height: 14.33px; color: var(--ink-2); }
+  .o-funds { display: flex; align-items: center; height: 16px; margin: 5.33px 16px 0; font-size: 14px; line-height: 14px; }
+  .o-funds svg { width: 16px; height: 16px; margin-right: 12.33px; }
+  .o-sep { height: .33px; background: #c6c6c8; margin: 32.33px 16px 0; }
+  .o-empty { margin: 60px 32px 0; text-align: center; font-size: 14px; line-height: 20px; color: var(--ink-2); }
+  .o-empty b { display: block; color: var(--ink); font-size: 16px; margin-bottom: 6px; }
+
+  /* ---------- listings sheet (Actions) ---------- */
+  .sheet-bg { position: absolute; inset: 0; background: rgba(0,0,0,.4); z-index: 20; display: none; }
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; max-height: 88%; background: #fff; border-radius: 20px 20px 0 0; z-index: 21; display: none;
+    padding: 0 16px calc(24px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .screen.sheet-open .sheet-bg, .screen.sheet-open .sheet { display: block; }
+  .sheet .grab { width: 36px; height: 5px; border-radius: 3px; background: #d9d9d9; margin: 8px auto 0; }
+  .sheet-head { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
+  .sheet-head h2 { margin: 0; }
+  .sheet-head .close { position: static; width: 32px; height: 32px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; }
+  .sheet .hint { margin-top: 10px; font-size: 12px; line-height: 16px; color: var(--ink-2); }
+  .sheet h3 { margin-top: 24px; font-size: 16px; line-height: 16px; font-weight: 700; }
+  .lrow { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: .5px solid #e5e5e5; }
+  .lrow img { width: 56px; height: 56px; border-radius: 12px; background: var(--surface-2); object-fit: contain; flex: none; }
+  .lrow .t { flex: 1; min-width: 0; }
+  .lrow .t .n { font-size: 14px; line-height: 18px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .lrow .t .m { font-size: 12px; line-height: 14px; color: var(--ink-2); margin-top: 3px; }
+  .lrow .cnt { width: 56px; height: 40px; border: 1.5px solid var(--line); border-radius: 8px; text-align: center; font: inherit; font-size: 14px; }
+  .lrow .del { color: var(--red); font-size: 12px; padding: 8px 0 8px 4px; }
+  .field { margin-top: 12px; }
+  .field label { display: block; font-size: 12px; line-height: 12px; color: var(--ink-2); margin-bottom: 6px; }
+  .field input[type=text], .field input[type=number] {
+    width: 100%; height: 48px; border: 1.5px solid var(--line); border-radius: 8px; padding: 0 15px; font: inherit; font-size: 14px; background: #fff; color: var(--ink); -webkit-appearance: none;
+  }
+  .field label.photo { display: grid; margin-bottom: 0; }
+  .photo { position: relative; width: 96px; height: 96px; border-radius: 16px; background: var(--surface-2); border: 1.5px dashed var(--line); display: grid; place-items: center; font-size: 12px; color: var(--ink-2); overflow: hidden; }
+  .photo img { width: 100%; height: 100%; object-fit: contain; }
+  .photo input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; }
+  .toggle { display: flex; align-items: center; justify-content: space-between; height: 48px; font-size: 14px; margin-top: 8px; }
+  .toggle input { width: 51px; height: 31px; -webkit-appearance: none; appearance: none; border-radius: 16px; background: #e9e9ea; position: relative; margin: 0; }
+  .toggle input:checked { background: var(--blue); }
+  .toggle input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.2); transition: left .15s; }
+  .toggle input:checked::after { left: 22px; }
+  .save { margin-top: 16px; width: 100%; height: 48px; border-radius: 24px; background: var(--blue); color: #fff; font-weight: 700; font-size: 16px; }
+  .save:disabled { opacity: .4; }
 </style>
 </head>
 <body>
+<script>(function () { var m = location.search.match(/fixture=([^&]+)/); if (m) document.write('<script src="' + decodeURIComponent(m[1]) + '"><\/script>'); })();</script>
 <div class="screen">
   <div class="scroll" id="scroll">
     <div class="top">
@@ -319,6 +420,47 @@
       </button>
       <div class="end"></div>
     </section>
+  </div>
+
+  <div class="scroll" id="orders">
+    <div class="top">
+      <div class="o-header">
+        <button class="circ o-back" id="backBtn" aria-label="Back"><svg viewBox="0 0 11 19" fill="none" stroke="#191919" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 1.5 1.6 9.5l7.9 8"/></svg></button>
+        <h1>Selling</h1>
+        <button class="circ o-more" aria-label="More"><svg viewBox="0 0 16 4"><circle cx="2" cy="2" r="1.67" fill="#191919"/><circle cx="8" cy="2" r="1.67" fill="#191919"/><circle cx="14" cy="2" r="1.67" fill="#191919"/></svg></button>
+        <button class="circ o-cart" aria-label="Cart">
+          <svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="#191919" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.6h2.3l2.1 9.9h9.3l1.9-6.9H4.6"/><circle cx="6.6" cy="15.4" r="1.2" fill="#191919"/><circle cx="13.6" cy="15.4" r="1.2" fill="#191919"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="o-tabs"><span class="o-tab">Active</span><span class="o-tab sel">Orders</span><span class="o-tab">Inactive</span><span class="o-tab">Drafts</span><span class="o-tab">Scheduled</span><span class="o-tab">Unsold</span></div>
+    <div class="o-pills">
+      <button class="o-search" aria-label="Search"><svg viewBox="0 0 14 14" fill="none" stroke="#191919" stroke-width="2" stroke-linecap="round"><circle cx="5.8" cy="5.8" r="4.6"/><path d="M9.3 9.3 13 13"/></svg></button>
+      <button class="o-pill o-actions" id="actionsBtn">Actions<svg viewBox="0 0 9 5" fill="none" stroke="#191919" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 .8l3.5 3.4L8 .8"/></svg></button>
+      <button class="o-pill o-refine"><svg viewBox="0 0 12 10" fill="none" stroke="#191919" stroke-width="1.8" stroke-linecap="round"><path d="M1 1h10M2.5 5h7M4.3 9h3.4"/></svg>Refine</button>
+    </div>
+    <div class="o-chips">
+      <span class="o-chip">All (<span data-key="all2y"></span>)</span>
+      <span class="o-chip sel">Post now (<span data-key="buyerPaid"></span>)</span>
+      <span class="o-chip">Awaiting Feedback to buyer (<span data-key="awaiting"></span>)</span>
+    </div>
+    <div class="o-list" id="olist"></div>
+  </div>
+
+  <div class="sheet-bg" id="sheetBg"></div>
+  <div class="sheet" id="sheet">
+    <div class="grab"></div>
+    <div class="sheet-head"><h2>Listings</h2><button class="close" id="sheetClose" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#191919" stroke-width="2" stroke-linecap="round"><path d="M1 1l10 10M11 1 1 11"/></svg></button></div>
+    <p class="hint">Today's open orders are dealt out across these listings. "Orders" is how many of them each listing gets; anything left over is shared in the same proportions.</p>
+    <div id="lrows"></div>
+    <h3>Add a listing</h3>
+    <div class="field"><label>Photo</label><label class="photo" id="photoBox"><span id="photoHint">Add photo</span><img id="photoPrev" alt="" hidden><input type="file" accept="image/*" id="photoIn"></label></div>
+    <div class="field"><label>Title</label><input type="text" id="fTitle" placeholder="Oral-B Pro Precision Clean Toothbrush Heads | 8 Pack"></div>
+    <div class="field"><label>Price (£)</label><input type="number" inputmode="decimal" step="0.01" min="0" id="fPrice" placeholder="9.25"></div>
+    <div class="field"><label>Colour options (optional, comma separated)</label><input type="text" id="fColours" placeholder="Black, White"></div>
+    <div class="field"><label>Orders</label><input type="number" inputmode="numeric" min="1" id="fCount" value="5"></div>
+    <label class="toggle">Sold via Promoted Listings<input type="checkbox" id="fPromo" checked></label>
+    <button class="save" id="saveBtn">Save listing</button>
   </div>
 
   <div class="bottom">
@@ -479,7 +621,7 @@
         fbAt = at + (2 + Math.floor(r() * 12)) * DAY + Math.floor(r() * DAY);
         var y = r(); fb = y < FB_NEG ? -1 : y < FB_NEG + FB_NEU ? 0 : 1;
       }
-      orders.push({ at: at, gross: p, net: net, fbAt: fbAt, fb: fb });
+      orders.push({ at: at, gross: p, net: net, ad: ad, fbAt: fbAt, fb: fb });
     }
     orders.sort(function (a, b) { return a.at - b.at; });
     // listings: a handful of ±1 changes spread through the day, netting at most ±12
@@ -500,21 +642,25 @@
   function compute(now) {
     var jan1 = new Date(new Date(now).getFullYear(), 0, 1).getTime();
     var from = Math.min(jan1, now - 60 * DAY);          // enough history for listings and the feedback window
+    var lo2y = now - 730 * DAY, all2y = 0, fbDone = 0;   // the Orders tab counts the last two years
     var active = Math.round((LIST_LO + LIST_HI) / 2), offset = 0, ytd = 0, ytdOrders = 0;
     var fbPos = 0, fbNeu = 0, fbNeg = 0, fbLo = now - 30 * DAY;
     var fundsLo = now - 4 * DAY, fundsHi = now - 3 * DAY, funds = 0;
-    for (var dn = dayNum(from); dn <= dayNum(now); dn++) {
-      var day = simDay(dn);
+    for (var dn = dayNum(lo2y); dn <= dayNum(now); dn++) {
+      var day = simDay(dn), hist = dn >= dayNum(from);
       day.orders.forEach(function (o) {
+        if (o.at > lo2y && o.at <= now) { all2y++; if (o.fbAt && o.fbAt <= now) fbDone++; }
+        if (!hist) return;
         if (o.at >= jan1 && o.at <= now) { ytd += o.gross; ytdOrders++; }
         // funds released over the last 24 hours: sales from 3 days ago, net of fees and ad fees
         if (o.at > fundsLo && o.at <= fundsHi) funds += o.net;
         if (o.fbAt && o.fbAt > fbLo && o.fbAt <= now) { if (o.fb > 0) fbPos++; else if (o.fb < 0) fbNeg++; else fbNeu++; }
       });
+      if (!hist) continue;
       day.events.forEach(function (e) { if (e.at <= now) active = Math.max(LIST_LO, Math.min(LIST_HI, active + e.dv)); });
       day.shocks.forEach(function (e) { if (e.at <= now) offset += e.dv; });
     }
-    var today = simDay(dayNum(now)).orders.filter(function (o) { return o.at <= now; }).length;
+    var todayOrders = simDay(dayNum(now)).orders.filter(function (o) { return o.at <= now; }), today = todayOrders.length;
     // listings with interested buyers you can send an offer to: a few percent of active, drifting day to day
     var dk = dayNum(now), f = (now - startOfDay(now)) / DAY;
     var offers = Math.max(1, Math.round((active + offset) * (offerShare(dk) * (1 - f) + offerShare(dk + 1) * f)));
@@ -522,7 +668,9 @@
     var inactive = Math.round((active + offset) * (inactiveShare(dk) * (1 - f) + inactiveShare(dk + 1) * f)) + Math.max(0, -offset);
     // the app drops the pence from the year-to-date total once it passes £100, rounding down
     return { ytd: ytd > 100 ? fmtInt(Math.floor(ytd)) : fmtMoney(ytd), active: fmtK(Math.max(0, active + offset)), inactive: fmtK(inactive), orders: fmtK(ytdOrders), buyerPaid: fmtInt(today), offers: fmtInt(offers),
-      funds: fmtMoney(funds), fbPos: fmtInt(fbPos), fbNeu: fmtInt(fbNeu), fbNeg: fmtInt(fbNeg) };
+      funds: fmtMoney(funds), fbPos: fmtInt(fbPos), fbNeu: fmtInt(fbNeu), fbNeg: fmtInt(fbNeg),
+      // the Orders tab: everything in the last two years, and those with no feedback exchanged yet
+      all2y: fmtInt(all2y), awaiting: fmtInt(all2y - fbDone), todayOrders: todayOrders };
   }
   function inactiveShare(dayKey) { var r = rng((SEED * 2971215073 + dayKey * 2654435761 + 9) >>> 0); return 0.02 + r() * 0.04; }
   function offerShare(dayKey) { var r = rng((SEED * 1181783497 + dayKey * 2654435761 + 5) >>> 0); return 0.03 + r() * 0.05; }
@@ -536,22 +684,209 @@
   }
 
   // ---------- rendering ----------
-  var slots = document.querySelectorAll('[data-key]');
+  var slots = document.querySelectorAll('[data-key]'), lastValues;
   function render() {
-    var v = compute(Date.now());
+    var now = window.FIXTURE && FIXTURE.today ? new Date(FIXTURE.today).getTime() : Date.now();
+    var v = compute(now);
+    if (window.FIXTURE && FIXTURE.counts) for (var k in FIXTURE.counts) v[k] = FIXTURE.counts[k];
+    lastValues = v;
     slots.forEach(function (el) { el.textContent = v[el.dataset.key]; });
     document.querySelector('#fbPosIcon circle').setAttribute('fill', +v.fbPos.replace(/,/g, '') > 0 ? '#3a8a3e' : '#191919');
     document.querySelector('#fbNegIcon circle').setAttribute('fill', +v.fbNeg.replace(/,/g, '') > 0 ? '#c32c20' : '#191919');
+    renderOrders(v, now);
   }
+
+  // ---------- orders screen ----------
+  // Today's unposted orders, dealt out across the listings added in the sheet behind "Actions".
+  var LS_KEY = 'selling.listings';
+  function loadListings() { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch (e) { return []; } }
+  function saveListings() { try { localStorage.setItem(LS_KEY, JSON.stringify(listings)); } catch (e) { alert('Could not save the listing: storage is full. Remove a listing or use a smaller photo.'); } }
+  var listings = window.FIXTURE ? FIXTURE.listings : loadListings();
+  var listingsVersion = 0;
+
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var DOWN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  function dShort(t) { var d = new Date(t); return d.getDate() + ' ' + MON[d.getMonth()]; }
+  function dPost(t) { return DOWN[new Date(t).getDay()] + ' ' + dShort(t); }
+  function fmtPence(n) { return n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  // buyer ids in the style e B a y shows them: a couple of name fragments and a number
+  var FRAG = ['moy', 'wrigh', 'hed', 'av', 'khy', 'bas', 'zaa', 'be', 'jon', 'mar', 'tel', 'ric', 'lou', 'dan', 'sam', 'kel', 'bry', 'ash', 'tom', 'lee', 'jac', 'har', 'ste', 'pat', 'nic', 'rob', 'ben', 'ell', 'cla', 'ros', 'fin', 'gra', 'hol', 'jes', 'kat', 'liz', 'mat', 'nat', 'oli', 'pau', 'ray', 'sue', 'tim', 'vic', 'wil', 'yas', 'zoe', 'car', 'dav', 'em', 'ger', 'ann', 'phil', 'mc', 'o', 'wood', 'smi', 'tay', 'bro', 'wal', 'jay'];
+  function buyerName(r) {
+    var n = r() < 0.35 ? 3 : 2, s = '';
+    for (var i = 0; i < n; i++) s += FRAG[Math.floor(r() * FRAG.length)];
+    s = s.slice(0, 9);
+    var x = r();
+    if (x < 0.3) s += '_' + Math.floor(r() * 100);
+    else if (x < 0.55) s += String(1000 + Math.floor(r() * 9000)).slice(0, 2 + Math.floor(r() * 3));
+    else if (x < 0.7) s += '-' + Math.floor(r() * 10);
+    else if (x < 0.8) s += '.' + FRAG[Math.floor(r() * FRAG.length)];
+    return s;
+  }
+
+  // Which listing each open order is for: exactly the counts set in the sheet, in a shuffled order,
+  // then anything beyond that in the same proportions.
+  function dealOrders(n, dayKey) {
+    var r = rng((SEED * 1664525 + dayKey * 1013904223 + 13) >>> 0), deck = [], total = 0;
+    listings.forEach(function (l, i) { var c = Math.max(1, l.count | 0); total += c; for (var k = 0; k < c; k++) deck.push(i); });
+    for (var i = deck.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), t = deck[i]; deck[i] = deck[j]; deck[j] = t; }
+    var out = [];
+    for (var q = 0; q < n; q++) {
+      if (q < deck.length) { out.push(deck[q]); continue; }
+      var x = r() * total, k = 0;
+      for (; k < listings.length - 1; k++) { x -= Math.max(1, listings[k].count | 0); if (x < 0) break; }
+      out.push(k);
+    }
+    return out;
+  }
+
+  // Photos are kept as data URLs; each card points at one blob URL per listing instead of repeating the data
+  var urlCache = new WeakMap();
+  function imgURL(l) {
+    if (!l.img) return '';
+    if (l.img.slice(0, 5) !== 'data:') return l.img;
+    var u = urlCache.get(l);
+    if (!u) {
+      var m = l.img.match(/^data:([^;]+);base64,(.*)$/);
+      if (!m) return l.img;
+      var bin = atob(m[2]), arr = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      u = URL.createObjectURL(new Blob([arr], { type: m[1] })); urlCache.set(l, u);
+    }
+    return u;
+  }
+
+  var FD_SVG = '<svg class="fd" viewBox="0 0 44 14"><rect width="13.33" height="13.33" rx="1.5" fill="#e3322b"/><circle cx="6.67" cy="3.7" r="1.2" fill="#fff"/><rect x="2.2" y="6.3" width="8.9" height="3.2" fill="#fff"/><rect x="4.5" y="10.4" width="4.3" height="1.5" fill="#fff"/><path d="M21.3 1.9h11M23 3.2h9.3M24.7 4.5h7.6" stroke="#e3322b" stroke-width=".55" opacity=".85"/><text x="32.7" y="5.8" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-style="italic" font-size="5.4" fill="#e3322b" textLength="8.3" lengthAdjust="spacingAndGlyphs">FAST</text><text x="19.4" y="11.4" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-style="italic" font-size="6.7" fill="#f2a73b" textLength="19.4" lengthAdjust="spacingAndGlyphs">DELIVERY</text></svg>';
+  var EX_SVG = '<span class="ex"><svg viewBox="0 0 14 14" fill="none" stroke="#191919" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.3 1.3H12.7V5.7M12.7 1.3 8 6M5.7 12.7H1.3V8.3M1.3 12.7 6 8"/></svg></span>';
+  var VAN_SVG = '<span class="o-van"><svg viewBox="0 0 16 13" fill="none" stroke="#191919" stroke-width="1.9" stroke-linejoin="round"><path d="M1.2 1.4h8.3v8.4H1.2z"/><path d="M9.5 4h2.9l2.4 2.6v3.2H9.5"/><circle cx="4.2" cy="11" r="1.4" fill="#191919" stroke="none"/><circle cx="12" cy="11" r="1.4" fill="#191919" stroke="none"/></svg></span>';
+  var ALERT_SVG = '<svg class="al" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#c32c20"/><path d="M8 4v4.6" stroke="#fff" stroke-width="2" stroke-linecap="round"/><circle cx="8" cy="11.6" r="1.1" fill="#fff"/></svg>';
+  var INFO_SVG = '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#2d66ed"/><circle cx="8" cy="4.6" r="1.1" fill="#fff"/><path d="M8 7.2v4.6" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg>';
+  var CHEV_SVG = '<svg class="chev" viewBox="0 0 8 14" fill="none" stroke="#191919" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6-6 6"/></svg>';
+
+  // One order as the app shows it. Everything about it is drawn from the order's own timestamp,
+  // so a card reads the same every time the list is rebuilt.
+  function orderCard(o, l, now, fx) {
+    var r = rng((Math.floor(o.at / 1000) * 2654435761 + SEED) >>> 0);
+    var x = r(), qty = x < 0.10 ? 2 : x < 0.13 ? 3 : 1;
+    var colour = l.colours && l.colours.length ? l.colours[Math.floor(r() * l.colours.length)] : '';
+    var buyer = buyerName(r);
+    var y = r(), today = startOfDay(now);
+    var paid = y < 0.2 ? today - DAY : today;                     // some paid late yesterday and are still to post
+    var sold = y >= 0.2 && y < 0.3 ? paid - DAY : paid;           // a few bought the day before they paid
+    var promoted = !!l.promoted && o.ad > 0;
+    if (fx) { qty = fx.qty || 1; colour = fx.colour || ''; buyer = fx.buyer; promoted = !!fx.promoted; paid = sold = today; }
+    var h = '<div class="o-due">' + ALERT_SVG + 'Post by ' + dPost(paid + DAY) + CHEV_SVG + '</div>';
+    h += '<div class="o-card"><div class="o-row"><div class="o-img"><div class="o-pic">' + (l.img ? '<img src="' + esc(imgURL(l)) + '" alt="">' : '') + '</div>' + FD_SVG + EX_SVG + '</div><div class="o-body">';
+    h += '<div class="o-status">Buyer paid' + VAN_SVG + '</div>';
+    h += '<div class="o-title">' + esc(l.title) + '</div>';
+    if (colour) h += '<div class="o-meta">Colour: ' + esc(colour) + '</div>';
+    if (qty > 1) h += '<div class="o-meta">Quantity: ' + qty + '</div>';
+    if (promoted) h += '<div class="o-tag">Sold via Promoted Listings</div>';
+    h += '<div class="o-price">£' + fmtPence((+l.price || 0) * qty) + ' <span class="sub">Subtotal</span></div>';
+    h += '<div class="o-lines">+ free postage (free for buyer, you pay)<br>Sold: ' + dShort(sold) + '<br>Buyer paid: ' + dShort(paid) + '<br>Buyer: ' + esc(buyer) + '</div>';
+    h += '</div></div><div class="o-funds">' + INFO_SVG + 'Funds on hold</div><div class="o-sep"></div></div>';
+    return h;
+  }
+
+  var olist = document.getElementById('olist'), lastSig = '';
+  function renderOrders(v, now, force) {
+    var sig = listingsVersion + ':' + dayNum(now) + ':' + v.todayOrders.length;
+    if (!force && sig === lastSig) return;
+    lastSig = sig;
+    if (!listings.length) {
+      olist.innerHTML = '<p class="o-empty"><b>No listings yet</b>Tap Actions and add the listings you sell. Today\'s ' + v.buyerPaid + ' open orders will be spread across them.</p>';
+      return;
+    }
+    var orders = v.todayOrders.slice().sort(function (a, b) { return b.at - a.at; }), h = '';
+    if (window.FIXTURE && FIXTURE.orders) {
+      FIXTURE.orders.forEach(function (fx, i) { h += orderCard({ at: now - i * 60000, ad: 1 }, listings[fx.listing], now, fx); });
+    } else {
+      var deal = dealOrders(orders.length, dayNum(now));
+      orders.forEach(function (o, i) { h += orderCard(o, listings[deal[i]], now); });
+    }
+    olist.innerHTML = h;
+  }
+
+  // ---------- navigation ----------
+  var screen = document.querySelector('.screen'), ordersEl = document.getElementById('orders');
+  function showOrders(push) {
+    screen.classList.add('orders');
+    if (push) history.pushState({ v: 'orders' }, '');
+    render();
+  }
+  function showHome() { screen.classList.remove('orders'); closeSheet(); }
+  document.querySelector('.task').addEventListener('click', function () { showOrders(true); });
+  document.getElementById('backBtn').addEventListener('click', function () {
+    if (history.state && history.state.v === 'orders') history.back(); else showHome();
+  });
+  window.addEventListener('popstate', function () { if (history.state && history.state.v === 'orders') showOrders(false); else showHome(); });
+
+  // ---------- listings sheet ----------
+  var lrows = document.getElementById('lrows'), photoData = '', photoPrev = document.getElementById('photoPrev'), photoHint = document.getElementById('photoHint');
+  var fTitle = document.getElementById('fTitle'), fPrice = document.getElementById('fPrice'), fColours = document.getElementById('fColours'), fCount = document.getElementById('fCount'), fPromo = document.getElementById('fPromo');
+  function openSheet() { drawRows(); screen.classList.add('sheet-open'); }
+  function closeSheet() { screen.classList.remove('sheet-open'); }
+  document.getElementById('actionsBtn').addEventListener('click', openSheet);
+  document.getElementById('sheetBg').addEventListener('click', closeSheet);
+  document.getElementById('sheetClose').addEventListener('click', closeSheet);
+  function drawRows() {
+    lrows.innerHTML = listings.map(function (l, i) {
+      return '<div class="lrow">' + (l.img ? '<img src="' + esc(imgURL(l)) + '" alt="">' : '<span style="width:56px;height:56px;border-radius:12px;background:#f7f7f7;flex:none"></span>') +
+        '<div class="t"><div class="n">' + esc(l.title) + '</div><div class="m">£' + fmtPence(+l.price || 0) + (l.colours && l.colours.length ? ' · ' + esc(l.colours.join(', ')) : '') + (l.promoted ? ' · Promoted' : '') + '</div></div>' +
+        '<input class="cnt" type="number" inputmode="numeric" min="1" value="' + (Math.max(1, l.count | 0)) + '" data-i="' + i + '" aria-label="Orders">' +
+        '<button class="del" data-i="' + i + '">Remove</button></div>';
+    }).join('') || '<p class="hint">Nothing added yet.</p>';
+  }
+  function changed() { listingsVersion++; if (!window.FIXTURE) saveListings(); drawRows(); render(); }
+  lrows.addEventListener('click', function (e) {
+    var b = e.target.closest('.del'); if (!b) return;
+    listings.splice(+b.dataset.i, 1); changed();
+  });
+  lrows.addEventListener('change', function (e) {
+    var c = e.target.closest('.cnt'); if (!c) return;
+    listings[+c.dataset.i].count = Math.max(1, +c.value | 0); changed();
+  });
+  document.getElementById('photoIn').addEventListener('change', function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    var url = URL.createObjectURL(f), img = new Image();
+    img.onload = function () {
+      // shrink to a thumbnail so a handful of listings fit in local storage
+      var s = Math.min(1, 480 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(img.width * s)); c.height = Math.max(1, Math.round(img.height * s));
+      var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+      photoData = c.toDataURL('image/jpeg', 0.85);
+      photoPrev.src = photoData; photoPrev.hidden = false; photoHint.hidden = true;
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  });
+  document.getElementById('saveBtn').addEventListener('click', function () {
+    var title = fTitle.value.trim(), price = parseFloat(fPrice.value);
+    if (!title) { fTitle.focus(); return; }
+    if (!(price >= 0)) { fPrice.focus(); return; }
+    listings.push({ title: title, price: Math.round(price * 100) / 100, img: photoData,
+      colours: fColours.value.split(',').map(function (s) { return s.trim(); }).filter(Boolean),
+      promoted: fPromo.checked, count: Math.max(1, +fCount.value | 0) });
+    fTitle.value = ''; fPrice.value = ''; fColours.value = ''; fCount.value = '5'; photoData = '';
+    photoPrev.hidden = true; photoHint.hidden = false; document.getElementById('photoIn').value = '';
+    changed();
+  });
+
   render();
 
   // keep the figures live while the page is open
   setInterval(render, 15000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) render(); });
 
-  // ?scroll=N for screenshots / testing
-  var m = location.search.match(/scroll=(\d+)/);
-  if (m) { document.documentElement.classList.add('capture'); document.getElementById('scroll').scrollTop = +m[1]; }
+  // ?scroll=N (and ?view=orders, ?fixture=path) for screenshots / testing
+  var m = location.search.match(/scroll=([\d.]+)/);
+  if (m || /view=orders/.test(location.search)) {
+    document.documentElement.classList.add('capture');
+    if (/view=orders/.test(location.search)) showOrders(false);
+    if (/sheet=1/.test(location.search)) openSheet();
+    (screen.classList.contains('orders') ? ordersEl : document.getElementById('scroll')).scrollTop = m ? +m[1] : 0;
+  }
 })();
 </script>
 </body>
